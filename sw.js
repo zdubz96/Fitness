@@ -1,18 +1,10 @@
-// Minimal app-shell cache so the PWA opens instantly and works offline for the shell.
-// Data (JSON in data/, GitHub API, Anthropic API) is always fetched fresh — never cached here.
-const CACHE_NAME = "ai-trainer-shell-v1";
-const SHELL_FILES = [
-  "./",
-  "./index.html",
-  "./manifest.json",
-  "./css/styles.css",
-  "./js/app.js",
-];
+// App-shell cache: network-first with cache fallback, so deploys reach the device on the
+// next load while the app still opens offline. Data (GitHub API, Anthropic API, data/*.json)
+// is never cached here.
+const CACHE_NAME = "ai-trainer-shell-v2";
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL_FILES)).then(() => self.skipWaiting())
-  );
+  self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
@@ -26,11 +18,19 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
   // Only handle same-origin GET requests for the app shell; let everything else
-  // (GitHub API, Anthropic API, data/*.json) go straight to the network.
+  // (GitHub API, Anthropic API) go straight to the network. Never cache data/.
   if (event.request.method !== "GET" || url.origin !== self.location.origin) return;
   if (url.pathname.includes("/data/")) return;
 
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
+    fetch(event.request)
+      .then((response) => {
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
