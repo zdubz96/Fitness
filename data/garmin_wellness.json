@@ -127,16 +127,16 @@
     "rem_sleep_seconds": 7140,
     "resting_hr": 49,
     "sleep_seconds": 26389,
-    "steps": 4823
+    "steps": 4898
   },
   {
-    "awake_seconds": null,
+    "awake_seconds": 1380,
     "date": "2026-07-02",
-    "deep_sleep_seconds": null,
-    "light_sleep_seconds": null,
-    "rem_sleep_seconds": null,
-    "resting_hr": null,
-    "sleep_seconds": null,
-    "steps": null
+    "deep_sleep_seconds": 3240,
+    "light_sleep_seconds": 15180,
+    "rem_sleep_seconds": 6060,
+    "resting_hr": 51,
+    "sleep_seconds": 24480,
+    "steps": 332
   }
 ]
