@@ -1,0 +1,56 @@
+name: Garmin Sync
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: garmin-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      # Persists the garth session between runs so we don't trigger a fresh login
+      # (and its rate-limit / MFA risk) every 30 minutes. Keyed by day so it still
+      # rotates periodically; falls back to the most recent cache on miss.
+      - name: Restore garth session
+        uses: actions/cache@v4
+        with:
+          path: .garth
+          key: garth-session-${{ github.run_id }}
+          restore-keys: |
+            garth-session-
+
+      - name: Run sync
+        id: sync
+        env:
+          GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
+          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+          GARTH_HOME: ${{ github.workspace }}/.garth
+        run: python scripts/garmin_sync.py
+
+      - name: Commit changes
+        if: steps.sync.outputs.changed == 'true'
+        run: |
+          git config user.name "garmin-sync-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/garmin_activities.json data/garmin_wellness.json data/garmin_health.json
+          git diff --cached --quiet || git commit -m "chore: sync Garmin data [skip ci]"
+          git push
