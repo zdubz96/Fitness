@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "aerobic_effect": null,
+    "anaerobic_effect": null,
+    "avg_hr": 114.0,
+    "calories": 98.0,
+    "date": "2026-06-28",
+    "distance_meters": 0.0,
+    "duration_seconds": 1115.133056640625,
+    "id": 23446946367,
+    "max_hr": 171.0,
+    "name": "Cardio",
+    "training_load": null,
+    "type": "indoor_cardio"
+  }
+]

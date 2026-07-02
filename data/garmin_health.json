@@ -1,1 +1,100 @@
-[]
+[
+  {
+    "date": "2026-06-19",
+    "hrv_avg_ms": 52,
+    "hrv_status": "BALANCED",
+    "intensity_minutes_moderate": null,
+    "intensity_minutes_vigorous": null
+  },
+  {
+    "date": "2026-06-20",
+    "hrv_avg_ms": null,
+    "hrv_status": null,
+    "intensity_minutes_moderate": null,
+    "intensity_minutes_vigorous": null
+  },
+  {
+    "date": "2026-06-21",
+    "hrv_avg_ms": null,
+    "hrv_status": null,
+    "intensity_minutes_moderate": null,
+    "intensity_minutes_vigorous": null
+  },
+  {
+    "date": "2026-06-22",
+    "hrv_avg_ms": 63,
+    "hrv_status": "BALANCED",
+    "intensity_minutes_moderate": null,
+    "intensity_minutes_vigorous": null
+  },
+  {
+    "date": "2026-06-23",
+    "hrv_avg_ms": 63,
+    "hrv_status": "UNBALANCED",
+    "intensity_minutes_moderate": null,
+    "intensity_minutes_vigorous": null
+  },
+  {
+    "date": "2026-06-24",
+    "hrv_avg_ms": 55,
+    "hrv_status": "UNBALANCED",
+    "intensity_minutes_moderate": null,
+    "intensity_minutes_vigorous": null
+  },
+  {
+    "date": "2026-06-25",
+    "hrv_avg_ms": 51,
+    "hrv_status": "UNBALANCED",
+    "intensity_minutes_moderate": null,
+    "intensity_minutes_vigorous": null
+  },
+  {
+    "date": "2026-06-26",
+    "hrv_avg_ms": 51,
+    "hrv_status": "UNBALANCED",
+    "intensity_minutes_moderate": null,
+    "intensity_minutes_vigorous": null
+  },
+  {
+    "date": "2026-06-27",
+    "hrv_avg_ms": 53,
+    "hrv_status": "UNBALANCED",
+    "intensity_minutes_moderate": null,
+    "intensity_minutes_vigorous": null
+  },
+  {
+    "date": "2026-06-28",
+    "hrv_avg_ms": 57,
+    "hrv_status": "BALANCED",
+    "intensity_minutes_moderate": null,
+    "intensity_minutes_vigorous": null
+  },
+  {
+    "date": "2026-06-29",
+    "hrv_avg_ms": 51,
+    "hrv_status": "BALANCED",
+    "intensity_minutes_moderate": null,
+    "intensity_minutes_vigorous": null
+  },
+  {
+    "date": "2026-06-30",
+    "hrv_avg_ms": null,
+    "hrv_status": null,
+    "intensity_minutes_moderate": null,
+    "intensity_minutes_vigorous": null
+  },
+  {
+    "date": "2026-07-01",
+    "hrv_avg_ms": 63,
+    "hrv_status": "BALANCED",
+    "intensity_minutes_moderate": null,
+    "intensity_minutes_vigorous": null
+  },
+  {
+    "date": "2026-07-02",
+    "hrv_avg_ms": null,
+    "hrv_status": null,
+    "intensity_minutes_moderate": null,
+    "intensity_minutes_vigorous": null
+  }
+]

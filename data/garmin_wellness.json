@@ -1,1 +1,142 @@
-[]
+[
+  {
+    "awake_seconds": 0,
+    "date": "2026-06-19",
+    "deep_sleep_seconds": 6240,
+    "light_sleep_seconds": 11460,
+    "rem_sleep_seconds": 5880,
+    "resting_hr": 55,
+    "sleep_seconds": 23556,
+    "steps": 13137
+  },
+  {
+    "awake_seconds": 540,
+    "date": "2026-06-20",
+    "deep_sleep_seconds": 4620,
+    "light_sleep_seconds": 14280,
+    "rem_sleep_seconds": 6060,
+    "resting_hr": 54,
+    "sleep_seconds": 24960,
+    "steps": 10818
+  },
+  {
+    "awake_seconds": 300,
+    "date": "2026-06-21",
+    "deep_sleep_seconds": 6900,
+    "light_sleep_seconds": 13680,
+    "rem_sleep_seconds": 8160,
+    "resting_hr": 51,
+    "sleep_seconds": 28740,
+    "steps": 6622
+  },
+  {
+    "awake_seconds": 360,
+    "date": "2026-06-22",
+    "deep_sleep_seconds": 7440,
+    "light_sleep_seconds": 11700,
+    "rem_sleep_seconds": 6120,
+    "resting_hr": 49,
+    "sleep_seconds": 25260,
+    "steps": 5888
+  },
+  {
+    "awake_seconds": 0,
+    "date": "2026-06-23",
+    "deep_sleep_seconds": 6000,
+    "light_sleep_seconds": 11220,
+    "rem_sleep_seconds": 9540,
+    "resting_hr": 49,
+    "sleep_seconds": 26745,
+    "steps": 10831
+  },
+  {
+    "awake_seconds": 840,
+    "date": "2026-06-24",
+    "deep_sleep_seconds": 5520,
+    "light_sleep_seconds": 11760,
+    "rem_sleep_seconds": 4980,
+    "resting_hr": 50,
+    "sleep_seconds": 22252,
+    "steps": 7599
+  },
+  {
+    "awake_seconds": 300,
+    "date": "2026-06-25",
+    "deep_sleep_seconds": 4620,
+    "light_sleep_seconds": 15840,
+    "rem_sleep_seconds": 7260,
+    "resting_hr": 49,
+    "sleep_seconds": 27701,
+    "steps": 5191
+  },
+  {
+    "awake_seconds": 0,
+    "date": "2026-06-26",
+    "deep_sleep_seconds": 5940,
+    "light_sleep_seconds": 10920,
+    "rem_sleep_seconds": 8940,
+    "resting_hr": 51,
+    "sleep_seconds": 25774,
+    "steps": 5248
+  },
+  {
+    "awake_seconds": 660,
+    "date": "2026-06-27",
+    "deep_sleep_seconds": 6480,
+    "light_sleep_seconds": 13980,
+    "rem_sleep_seconds": 5640,
+    "resting_hr": 51,
+    "sleep_seconds": 26100,
+    "steps": 16699
+  },
+  {
+    "awake_seconds": 540,
+    "date": "2026-06-28",
+    "deep_sleep_seconds": 4800,
+    "light_sleep_seconds": 14040,
+    "rem_sleep_seconds": 5280,
+    "resting_hr": 52,
+    "sleep_seconds": 24080,
+    "steps": 6934
+  },
+  {
+    "awake_seconds": 120,
+    "date": "2026-06-29",
+    "deep_sleep_seconds": 7440,
+    "light_sleep_seconds": 12120,
+    "rem_sleep_seconds": 6840,
+    "resting_hr": 50,
+    "sleep_seconds": 26369,
+    "steps": 6255
+  },
+  {
+    "awake_seconds": null,
+    "date": "2026-06-30",
+    "deep_sleep_seconds": null,
+    "light_sleep_seconds": null,
+    "rem_sleep_seconds": null,
+    "resting_hr": 55,
+    "sleep_seconds": null,
+    "steps": 6936
+  },
+  {
+    "awake_seconds": 1260,
+    "date": "2026-07-01",
+    "deep_sleep_seconds": 4800,
+    "light_sleep_seconds": 14460,
+    "rem_sleep_seconds": 7140,
+    "resting_hr": 49,
+    "sleep_seconds": 26389,
+    "steps": 4823
+  },
+  {
+    "awake_seconds": null,
+    "date": "2026-07-02",
+    "deep_sleep_seconds": null,
+    "light_sleep_seconds": null,
+    "rem_sleep_seconds": null,
+    "resting_hr": null,
+    "sleep_seconds": null,
+    "steps": null
+  }
+]
