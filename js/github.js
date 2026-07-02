@@ -58,7 +58,9 @@ export async function putFile(path, data, message) {
     method: "PUT",
     headers: { ...apiHeaders(s.githubToken), "Content-Type": "application/json" },
     body: JSON.stringify({
-      message: message || `chore: update ${path}`,
+      // Data saves never need a Pages redeploy — the frontend reads data/*.json via the
+      // API at runtime, so suppress CI on every app-originated commit.
+      message: `${message || `chore: update ${path}`} [skip ci]`,
       content,
       sha: sha || undefined,
       branch: s.githubBranch || "main",
