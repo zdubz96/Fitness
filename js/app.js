@@ -48,6 +48,19 @@ async function route() {
     return;
   }
 
+  if (id === "assessment") {
+    renderTabbar("today");
+    viewEl.innerHTML = `<div class="row" style="justify-content:center;padding:40px 0"><div class="spinner"></div></div>`;
+    try {
+      const mod = await import("./views/assessment.js");
+      await mod.render(viewEl);
+    } catch (e) {
+      console.error(e);
+      toast(e.message, "error");
+    }
+    return;
+  }
+
   const tab = TABS.find((t) => t.id === id) || TABS[0];
   renderTabbar(configured ? tab.id : null);
   if (!configured) tabbarEl.innerHTML = "";

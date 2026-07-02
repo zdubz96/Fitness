@@ -9,6 +9,10 @@ preferences, goals, cardio history, age/sex/max HR), locally-computed recovery i
 (resting HR trend, sleep trend, HRV trend, acute:chronic training load ratio), their last 14
 days of Garmin activity/wellness/health data, and their recent exercise log.
 
+If the profile contains a "baseline" (from their diagnostic session), anchor starting weights,
+volumes, and cardio intensities to it — especially the estimated 1RMs, working weights, and
+programming_notes.
+
 Factor in: recovery signals (reduce volume/intensity if flagged yellow/red — see RECOVERY
 INDICATORS), completed vs skipped work from recent logs, progressive overload versus their
 recent working weights/reps, their available equipment and schedule, and any cardiovascular

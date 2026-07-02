@@ -45,9 +45,18 @@ export async function render(container) {
       .reduce((sum, a) => sum + (a.training_load || 0), 0);
 
     const showReviewBanner = needsWeeklyReview(reviews);
+    const profile = getLocal("trainer_profile") || {};
+    const showAssessmentBanner = !profile.baseline;
 
     container.innerHTML = `
       <h1>Today</h1>
+
+      ${showAssessmentBanner ? `<div class="card" style="border-color:var(--accent)">
+        <div class="row">
+          <div><strong>${profile.pending_assessment ? "Diagnostic in progress" : "Get your baseline"}</strong><p style="margin:2px 0 0">${profile.pending_assessment ? "Finish your diagnostic session and record results." : "Do a one-off diagnostic session so your coach knows exactly where you're starting from."}</p></div>
+          <a href="#/assessment"><button class="secondary">${profile.pending_assessment ? "Continue" : "Start"}</button></a>
+        </div>
+      </div>` : ""}
 
       ${showReviewBanner ? `<div class="card" style="border-color:var(--accent)">
         <div class="row">
