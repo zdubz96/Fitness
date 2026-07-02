@@ -12,11 +12,35 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import sys
 from datetime import date, timedelta
 from pathlib import Path
 
-import garth
+
+def _sanitize_session_dir() -> None:
+    """Remove a corrupt cached session BEFORE importing garth.
+
+    garth auto-resumes from GARTH_HOME at import time and crashes with a JSONDecodeError
+    if any token file is empty/corrupt (e.g. a bad Actions cache restore), so validate
+    every JSON file first and wipe the directory if anything is unreadable.
+    """
+    home = Path(os.environ.get("GARTH_HOME", str(Path(__file__).resolve().parent.parent / ".garth")))
+    if not home.exists():
+        return
+    for f in home.glob("*.json"):
+        try:
+            with f.open("r", encoding="utf-8") as fh:
+                json.load(fh)
+        except (json.JSONDecodeError, OSError):
+            print(f"[garmin_sync] corrupt session file {f.name}, clearing session dir", flush=True)
+            shutil.rmtree(home, ignore_errors=True)
+            return
+
+
+_sanitize_session_dir()
+
+import garth  # noqa: E402 - must come after session sanitization (garth auto-resumes on import)
 from garth.exc import GarthException
 from garminconnect import (
     Garmin,
