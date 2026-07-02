@@ -1,1 +1,38 @@
-{}
+{
+  "experience_level": "Experienced gym-goer with significant ad hoc training history but no structured programming experience",
+  "injuries": "Rotator cuffs strain easily — avoid heavy overhead loading and vulnerable shoulder positions",
+  "equipment": "Apartment building gym with free weights, barbells, squat racks, reformer machine, and pool",
+  "schedule": "3-4 days per week, 1 hour per session",
+  "preferences": "Enjoys progressive overload and lifting heavier over time; dislikes running; open to pool-based cardio",
+  "goals": [
+    {
+      "text": "Build muscle size and look bigger",
+      "type": "strength"
+    },
+    {
+      "text": "Build strength with progressive overload",
+      "type": "strength"
+    },
+    {
+      "text": "Improve cardio fitness and achieve above-average VO2 max",
+      "type": "cardio"
+    },
+    {
+      "text": "Run 1.5 miles in under 12 minutes",
+      "type": "cardio"
+    },
+    {
+      "text": "Comfortably run a 5k",
+      "type": "cardio"
+    },
+    {
+      "text": "General wellbeing and mood benefits from exercise",
+      "type": "other"
+    }
+  ],
+  "cardio_history": "Self-assessed at or below average cardio fitness; has army background so some prior fitness base; observed max HR around 160-170 bpm during runs",
+  "age": 30,
+  "sex": "male",
+  "max_hr": 165,
+  "onboarding_complete": true
+}
