@@ -34,5 +34,68 @@
   "age": 30,
   "sex": "male",
   "max_hr": 165,
-  "onboarding_complete": true
+  "onboarding_complete": true,
+  "pending_assessment": {
+    "intro": "Welcome to your baseline diagnostic — this single session is all about taking an honest snapshot of where you are right now, so every future workout has real numbers to build from. We'll test a few key lifts to find your working weights, check your core endurance, assess hip mobility, and finish with a pool-based cardio effort that respects your dislike of running. Recovery looks green today, so you're in a great position to push honestly without holding back.",
+    "tests": [
+      {
+        "id": "barbell_back_squat_5rm",
+        "name": "Barbell Back Squat — Heavy Set of 5",
+        "category": "strength",
+        "protocol": "Warm up with 5 minutes of light movement (leg swings, bodyweight squats). Then perform: 1×8 at an empty bar, rest 90s; 1×5 at ~50% of your expected working weight, rest 90s; 1×3 at ~70%, rest 2min; 1×1 at ~85%, rest 2min. Then attempt a challenging but clean set of 5 reps — this should be a weight where rep 5 is genuinely hard but form stays solid. Bar stays on mid-to-upper traps (low bar also fine), no overhead load concern here. Rest fully before each build-up set. Stop if form breaks down.",
+        "record": "weight_reps",
+        "record_label": "Weight (kg or lb) × reps completed in your best set of 5"
+      },
+      {
+        "id": "barbell_deadlift_5rm",
+        "name": "Barbell Conventional Deadlift — Heavy Set of 5",
+        "category": "strength",
+        "protocol": "After squats, rest 5 minutes. Warm up the deadlift with: 1×5 at 50% of your expected working weight, rest 90s; 1×3 at ~70%, rest 2min; 1×1 at ~85%, rest 2min. Then do your challenging set of 5. Keep a neutral spine throughout; this is a hinge pattern, not a squat. No shoulder vulnerability here — focus on hip drive and lat engagement. Record the heaviest set of 5 you complete with good form.",
+        "record": "weight_reps",
+        "record_label": "Weight (kg or lb) × reps completed in your best set of 5"
+      },
+      {
+        "id": "barbell_bench_press_5rm",
+        "name": "Barbell Bench Press — Comfortable Heavy Set of 5",
+        "category": "strength",
+        "protocol": "Given rotator cuff sensitivity, use a moderate grip width (just outside shoulder width), keep elbows at roughly 45–60° from torso rather than flared wide, and do NOT push to true failure. Warm up with: 1×8 empty bar, rest 90s; 1×5 at ~50%, rest 90s; 1×3 at ~70%, rest 2min; 1×1 at ~85%, rest 2min. Then perform a challenging set of 5 with good control. Stop at any shoulder discomfort — note if that happens. Shoulder blades retracted and depressed throughout.",
+        "record": "weight_reps",
+        "record_label": "Weight (kg or lb) × reps completed in your best set of 5"
+      },
+      {
+        "id": "max_pushups",
+        "name": "Max Push-Ups to Failure",
+        "category": "strength",
+        "protocol": "After at least 3 minutes of rest following bench press. No warm-up set needed — bench press has already primed you. Get into a standard push-up position: hands just outside shoulders, body in a straight line from head to heel. Perform as many reps as possible without stopping, maintaining full range (chest within 2–3 cm of floor, elbows fully extended at top). Stop when you can no longer maintain form. Note: use a neutral wrist position; if wrist discomfort arises, stop early and note it.",
+        "record": "reps",
+        "record_label": "Total reps completed with good form"
+      },
+      {
+        "id": "plank_hold",
+        "name": "Forearm Plank Hold",
+        "category": "core",
+        "protocol": "Rest 3 minutes after push-ups. Get into a forearm plank: elbows directly under shoulders, forearms flat, body in a straight line from head to heel. Hold as long as possible while maintaining a truly neutral spine — no sagging hips, no pike. Stop the timer the moment your hips drop more than ~2 cm or you need to adjust position. Have someone time you, or use a phone propped nearby. No specific warm-up needed.",
+        "record": "time_seconds",
+        "record_label": "Total hold time in seconds"
+      },
+      {
+        "id": "deep_squat_hold",
+        "name": "Deep Bodyweight Squat Hold — Mobility Assessment",
+        "category": "mobility",
+        "protocol": "Stand with feet shoulder-width apart, toes angled out 15–30°. Lower into the deepest squat you can comfortably hold, aiming to get your hips below your knees. Hold for up to 60 seconds. Note: can you hold the bottom position with your heels flat on the floor? Do your knees track over your toes? Is there any rounding in the lower back or discomfort in hips, knees, or ankles? No hands on the floor — arms extended in front for balance if needed. This is an observation test, not a pass/fail.",
+        "record": "note",
+        "record_label": "Describe: heel contact (yes/no), depth achieved, any discomfort or compensation noted"
+      },
+      {
+        "id": "pool_steady_state_20min",
+        "name": "20-Minute Steady Pool Swim — Aerobic Baseline",
+        "category": "cardio",
+        "protocol": "Head to the pool last. Swim any stroke you're comfortable with (freestyle recommended) at a pace you could sustain for the full 20 minutes — conversational effort, roughly 60–70% of max HR (target ~100–115 bpm if you can monitor). Warm up with 2 easy lengths. Then start a 20-minute continuous effort, counting total lengths completed. If you wear your Garmin in the water, record average HR. If not, note your perceived exertion (scale 1–10) at the midpoint and end. Cool down with 2 easy lengths after the timer.",
+        "record": "note",
+        "record_label": "Total lengths in 20 min, average HR if available, and perceived effort (1–10) at midpoint and finish"
+      }
+    ],
+    "created_at": "2026-07-02T20:23:51.706Z",
+    "results": {}
+  }
 }
