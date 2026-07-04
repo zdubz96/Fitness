@@ -1,1 +1,261 @@
-[]
+[
+  {
+    "date": "2026-07-04",
+    "program_id": "prog-1783188074549",
+    "day_offset": 0,
+    "focus": "Rest / active recovery",
+    "is_rest_day": true,
+    "duration_min": null,
+    "exercises": [],
+    "rationale": "Assessment and strength session already completed today — full rest to absorb that stimulus.",
+    "status": "rest",
+    "generated_at": "2026-07-04T18:01:14.549Z"
+  },
+  {
+    "date": "2026-07-05",
+    "program_id": "prog-1783188074549",
+    "day_offset": 1,
+    "focus": "Full-body strength A",
+    "is_rest_day": false,
+    "duration_min": 60,
+    "exercises": [
+      {
+        "name": "Face Pulls (cable or band)",
+        "sets": 3,
+        "reps": "15",
+        "rest_seconds": 60,
+        "rpe_target": 5,
+        "notes": "Shoulder prehab — mandatory opener",
+        "completed_sets": []
+      },
+      {
+        "name": "Barbell Back Squat",
+        "sets": 3,
+        "reps": "5",
+        "rest_seconds": 180,
+        "rpe_target": 7,
+        "notes": "Start at 72.5 kg — first working session",
+        "completed_sets": []
+      },
+      {
+        "name": "Barbell Conventional Deadlift",
+        "sets": 3,
+        "reps": "5",
+        "rest_seconds": 180,
+        "rpe_target": 7,
+        "notes": "Start at 85 kg, brace hard each rep",
+        "completed_sets": []
+      },
+      {
+        "name": "Barbell Bench Press",
+        "sets": 3,
+        "reps": "5",
+        "rest_seconds": 150,
+        "rpe_target": 7,
+        "notes": "55 kg, elbows 45–60° from torso",
+        "completed_sets": []
+      },
+      {
+        "name": "Dumbbell Row",
+        "sets": 3,
+        "reps": "10",
+        "rest_seconds": 90,
+        "rpe_target": 7,
+        "notes": "Full ROM, chest supported or braced knee",
+        "completed_sets": []
+      },
+      {
+        "name": "Forearm Plank",
+        "sets": 3,
+        "reps": "70s hold",
+        "rest_seconds": 60,
+        "rpe_target": 6,
+        "notes": "Progress from 90s baseline — controlled breathing",
+        "completed_sets": []
+      }
+    ],
+    "rationale": "First structured working session at baseline loads; compounds first, row and core to finish.",
+    "status": "planned",
+    "generated_at": "2026-07-04T18:01:14.549Z"
+  },
+  {
+    "date": "2026-07-06",
+    "program_id": "prog-1783188074549",
+    "day_offset": 2,
+    "focus": "Zone 2 pool swim",
+    "is_rest_day": false,
+    "duration_min": 45,
+    "exercises": [
+      {
+        "name": "Continuous Freestyle Swim",
+        "sets": 1,
+        "reps": "20 min",
+        "rest_seconds": 0,
+        "rpe_target": 6,
+        "notes": "Target avg HR 112–131 bpm — match or beat 550 m",
+        "completed_sets": []
+      }
+    ],
+    "rationale": "Zone 2 aerobic base session — keep HR steady, no spikes above 135 bpm.",
+    "status": "planned",
+    "generated_at": "2026-07-04T18:01:14.549Z"
+  },
+  {
+    "date": "2026-07-07",
+    "program_id": "prog-1783188074549",
+    "day_offset": 3,
+    "focus": "Rest",
+    "is_rest_day": true,
+    "duration_min": null,
+    "exercises": [],
+    "rationale": "Recovery day between swim and next strength session.",
+    "status": "rest",
+    "generated_at": "2026-07-04T18:01:14.549Z"
+  },
+  {
+    "date": "2026-07-08",
+    "program_id": "prog-1783188074549",
+    "day_offset": 4,
+    "focus": "Full-body strength B",
+    "is_rest_day": false,
+    "duration_min": 60,
+    "exercises": [
+      {
+        "name": "Face Pulls (cable or band)",
+        "sets": 3,
+        "reps": "15",
+        "rest_seconds": 60,
+        "rpe_target": 5,
+        "notes": "Shoulder prehab — every upper session",
+        "completed_sets": []
+      },
+      {
+        "name": "Barbell Back Squat",
+        "sets": 3,
+        "reps": "5",
+        "rest_seconds": 180,
+        "rpe_target": 7,
+        "notes": "77.5 kg — +5 kg from session A",
+        "completed_sets": []
+      },
+      {
+        "name": "Romanian Deadlift",
+        "sets": 3,
+        "reps": "8",
+        "rest_seconds": 120,
+        "rpe_target": 7,
+        "notes": "Start ~60 kg, hinge deep, hamstring stretch",
+        "completed_sets": []
+      },
+      {
+        "name": "Incline Dumbbell Press",
+        "sets": 3,
+        "reps": "10",
+        "rest_seconds": 120,
+        "rpe_target": 7,
+        "notes": "~20–22 kg DBs, moderate incline, elbows in",
+        "completed_sets": []
+      },
+      {
+        "name": "Lat Pulldown",
+        "sets": 3,
+        "reps": "10",
+        "rest_seconds": 90,
+        "rpe_target": 7,
+        "notes": "Shoulder-width grip, pull to upper chest",
+        "completed_sets": []
+      },
+      {
+        "name": "Cable Lateral Raise",
+        "sets": 3,
+        "reps": "12",
+        "rest_seconds": 60,
+        "rpe_target": 6,
+        "notes": "Light load, controlled tempo, no shoulder pain",
+        "completed_sets": []
+      }
+    ],
+    "rationale": "Strength B day adds accessory volume and +5 kg squat progression; deadlift variant for hamstring development.",
+    "status": "planned",
+    "generated_at": "2026-07-04T18:01:14.549Z"
+  },
+  {
+    "date": "2026-07-09",
+    "program_id": "prog-1783188074549",
+    "day_offset": 5,
+    "focus": "Rest",
+    "is_rest_day": true,
+    "duration_min": null,
+    "exercises": [],
+    "rationale": "Planned rest to allow lower-body recovery before optional 4th session.",
+    "status": "rest",
+    "generated_at": "2026-07-04T18:01:14.549Z"
+  },
+  {
+    "date": "2026-07-10",
+    "program_id": "prog-1783188074549",
+    "day_offset": 6,
+    "focus": "Full-body strength C (optional 4th day)",
+    "is_rest_day": false,
+    "duration_min": 60,
+    "exercises": [
+      {
+        "name": "Face Pulls (cable or band)",
+        "sets": 3,
+        "reps": "15",
+        "rest_seconds": 60,
+        "rpe_target": 5,
+        "notes": "Shoulder prehab opener",
+        "completed_sets": []
+      },
+      {
+        "name": "Barbell Back Squat",
+        "sets": 3,
+        "reps": "5",
+        "rest_seconds": 180,
+        "rpe_target": 7,
+        "notes": "82.5 kg — +5 kg from session B",
+        "completed_sets": []
+      },
+      {
+        "name": "Barbell Conventional Deadlift",
+        "sets": 3,
+        "reps": "5",
+        "rest_seconds": 180,
+        "rpe_target": 7,
+        "notes": "90 kg — +5 kg from baseline",
+        "completed_sets": []
+      },
+      {
+        "name": "Barbell Bench Press",
+        "sets": 3,
+        "reps": "5",
+        "rest_seconds": 150,
+        "rpe_target": 7,
+        "notes": "57.5 kg — +2.5 kg from session A",
+        "completed_sets": []
+      },
+      {
+        "name": "Cable Row",
+        "sets": 3,
+        "reps": "10",
+        "rest_seconds": 90,
+        "rpe_target": 7,
+        "notes": "Neutral grip, squeeze shoulder blades at peak",
+        "completed_sets": []
+      },
+      {
+        "name": "Dead Bug",
+        "sets": 3,
+        "reps": "10 each side",
+        "rest_seconds": 60,
+        "rpe_target": 5,
+        "notes": "Slow, controlled — lower back stays flat",
+        "completed_sets": []
+      }
+    ],
+    "rationale": "Optional 4th session if feeling fresh; maintains linear progression on all three main lifts.",
+    "status": "planned",
+    "generated_at": "2026-07-04T18:01:14.549Z"
+  }
+]
