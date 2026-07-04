@@ -12,7 +12,7 @@ Respond with ONLY a JSON object (no markdown fences, no commentary):
 export async function estimateGoalProgress(goal) {
   const ctx = buildCoachContext();
   const userMessage = `Goal: ${JSON.stringify(goal)}\n\n${contextToPromptText(ctx)}`;
-  const result = await sendMessageForJSON(SYSTEM_PROMPT, [{ role: "user", content: userMessage }], { maxTokens: 512 });
+  const result = await sendMessageForJSON(SYSTEM_PROMPT, [{ role: "user", content: userMessage }], { maxTokens: 1024 });
 
   const goals = getLocal("goals");
   const idx = goals.findIndex((g) => g.id === goal.id);

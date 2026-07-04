@@ -17,7 +17,7 @@ Respond with ONLY a JSON object (no markdown fences, no commentary):
 export async function requestExerciseAdjustment(exercise, userNote) {
   const ctx = buildCoachContext();
   const userMessage = `Exercise to adjust: ${JSON.stringify(exercise)}\nClient's note: "${userNote}"\n\n${contextToPromptText(ctx)}`;
-  const result = await sendMessageForJSON(SYSTEM_PROMPT, [{ role: "user", content: userMessage }], { maxTokens: 1024 });
+  const result = await sendMessageForJSON(SYSTEM_PROMPT, [{ role: "user", content: userMessage }], { maxTokens: 1536 });
   return result; // { updated_exercise, reason }
 }
 

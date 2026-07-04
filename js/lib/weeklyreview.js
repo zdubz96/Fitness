@@ -10,12 +10,13 @@ on cardio progress if they have a cardio goal: VO2 max movement, Zone 2 volume, 
 easy/hard training polarization looks right (flag if too much training sits in the moderate
 "gray zone" between Zone 2 and threshold).
 
-Respond with ONLY a JSON object (no markdown fences, no commentary):
+Keep each field tight and scannable — a few sentences at most, not an essay. This renders on a
+phone. Respond with ONLY a JSON object (no markdown fences, no commentary):
 {
-  "progress": string,       // progress vs goals, with concrete numbers
-  "wins": string,
-  "adjustments": string,
-  "next_week_focus": string,
+  "progress": string,       // progress vs goals, with concrete numbers (<= ~4 sentences)
+  "wins": string,           // <= ~3 sentences
+  "adjustments": string,    // <= ~3 sentences
+  "next_week_focus": string,// <= ~3 sentences
   "cardio_notes": string    // VO2 max/zone/polarization commentary, or "" if no cardio goal
 }`;
 
@@ -40,7 +41,7 @@ export function needsWeeklyReview(reviews) {
 export async function generateWeeklyReview() {
   const ctx = buildCoachContext();
   const userMessage = `Write this week's Coach Review.\n\n${contextToPromptText(ctx)}`;
-  const result = await sendMessageForJSON(SYSTEM_PROMPT, [{ role: "user", content: userMessage }], { maxTokens: 1536 });
+  const result = await sendMessageForJSON(SYSTEM_PROMPT, [{ role: "user", content: userMessage }], { maxTokens: 3000 });
 
   const review = {
     week: currentWeekKey(),
