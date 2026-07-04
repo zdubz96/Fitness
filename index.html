@@ -16,7 +16,27 @@
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("sw.js").catch((e) => console.warn("SW registration failed", e));
+        navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then((reg) => {
+          // Check for a new version on every launch.
+          reg.update();
+          // When a freshly-installed worker takes over, reload once so the new code shows
+          // immediately instead of on some later visit.
+          let refreshing = false;
+          navigator.serviceWorker.addEventListener("controllerchange", () => {
+            if (refreshing) return;
+            refreshing = true;
+            window.location.reload();
+          });
+          reg.addEventListener("updatefound", () => {
+            const nw = reg.installing;
+            if (!nw) return;
+            nw.addEventListener("statechange", () => {
+              if (nw.state === "installed" && navigator.serviceWorker.controller) {
+                nw.postMessage("skip-waiting");
+              }
+            });
+          });
+        }).catch((e) => console.warn("SW registration failed", e));
       });
     }
   </script>

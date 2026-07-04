@@ -1,10 +1,15 @@
 // App-shell cache: network-first with cache fallback, so deploys reach the device on the
 // next load while the app still opens offline. Data (GitHub API, Anthropic API, data/*.json)
 // is never cached here.
-const CACHE_NAME = "ai-trainer-shell-v2";
+const CACHE_NAME = "ai-trainer-shell-v3";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
+});
+
+// The page tells a waiting worker to activate immediately after a new version installs.
+self.addEventListener("message", (event) => {
+  if (event.data === "skip-waiting") self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
