@@ -1,5 +1,6 @@
 import { getLocal, refresh, save } from "../state.js";
 import { toast } from "../components/toast.js";
+import { unitLabel, displayWeight } from "../lib/units.js";
 
 function todayStr() {
   const d = new Date();
@@ -13,10 +14,17 @@ function escapeHtml(str) {
 
 export async function render(container) {
   let log = getLocal("exercise_log");
+  let bodyMetrics = getLocal("body_metrics");
   let pendingSets = []; // sets being built for the current entry before saving
+  const units = unitLabel();
 
   paint();
   refresh("exercise_log").then((l) => { log = l; paint(); }).catch(() => {});
+  refresh("body_metrics").then((b) => { bodyMetrics = b; paint(); }).catch(() => {});
+
+  function latestWeight() {
+    return bodyMetrics[bodyMetrics.length - 1] || {};
+  }
 
   function recentExerciseNames() {
     const seen = [];
@@ -52,7 +60,7 @@ export async function render(container) {
             <input id="set-reps" type="number" inputmode="numeric" />
           </div>
           <div>
-            <label for="set-weight">Weight</label>
+            <label for="set-weight">Weight (${units})</label>
             <input id="set-weight" type="number" inputmode="decimal" />
           </div>
           <div>
@@ -70,11 +78,45 @@ export async function render(container) {
         <button id="save-entry">Save entry</button>
       </div>
 
+      <div class="card stack">
+        <h2>Body weight</h2>
+        ${bodyMetrics.length ? `<p style="font-size:13px">Last: <strong>${displayWeight(latestWeight().weight, latestWeight().weight_unit)} ${units}</strong> on ${latestWeight().date}</p>` : `<p style="font-size:13px">No weigh-ins logged yet.</p>`}
+        <div class="row">
+          <input id="bw-value" type="number" inputmode="decimal" placeholder="Weight (${units})" />
+          <button id="log-bw" class="secondary" style="white-space:nowrap">Log</button>
+        </div>
+      </div>
+
       <div class="card">
         <h2>Today's log</h2>
         ${todaysEntries.length ? todaysEntries.map(renderEntry).join("") : `<p>Nothing logged yet today.</p>`}
       </div>
     `;
+
+    const logBwBtn = document.getElementById("log-bw");
+    if (logBwBtn) {
+      logBwBtn.addEventListener("click", async () => {
+        const value = Number(document.getElementById("bw-value").value);
+        if (!value) return toast("Enter a weight first", "error");
+        const entry = {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          date: today,
+          weight: value,
+          weight_unit: units,
+          created_at: new Date().toISOString(),
+        };
+        // One weigh-in per day: replace any existing entry for today.
+        const next = [...bodyMetrics.filter((b) => b.date !== today), entry].sort((a, b) => (a.date < b.date ? -1 : 1));
+        try {
+          await save("body_metrics", next, "log: body weight");
+          bodyMetrics = next;
+          toast("Weight logged", "success");
+          paint();
+        } catch (e) {
+          toast(e.message, "error");
+        }
+      });
+    }
 
     container.querySelectorAll(".shortcut").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -87,7 +129,7 @@ export async function render(container) {
       const weight = Number(document.getElementById("set-weight").value) || 0;
       const rpe = Number(document.getElementById("set-rpe").value) || null;
       if (!reps) return toast("Enter reps first", "error");
-      pendingSets.push({ reps, weight, rpe });
+      pendingSets.push({ reps, weight, rpe, weight_unit: units });
       document.getElementById("set-reps").value = "";
       document.getElementById("set-weight").value = "";
       document.getElementById("set-rpe").value = "";
@@ -124,12 +166,14 @@ export async function render(container) {
   function renderPendingSets() {
     if (!pendingSets.length) return `<p style="font-size:13px">No sets added yet.</p>`;
     return `<div class="stack" style="gap:4px">${pendingSets
-      .map((s, i) => `<div class="row" style="font-size:14px"><span>Set ${i + 1}: ${s.reps} reps${s.weight ? ` @ ${s.weight}` : ""}${s.rpe ? ` (RPE ${s.rpe})` : ""}</span></div>`)
+      .map((s, i) => `<div class="row" style="font-size:14px"><span>Set ${i + 1}: ${s.reps} reps${s.weight ? ` @ ${s.weight} ${units}` : ""}${s.rpe ? ` (RPE ${s.rpe})` : ""}</span></div>`)
       .join("")}</div>`;
   }
 
   function renderEntry(e) {
-    const setsText = e.sets.map((s) => `${s.reps}${s.weight ? `@${s.weight}` : ""}`).join(", ");
+    const setsText = e.sets
+      .map((s) => `${s.reps}${s.weight ? `@${displayWeight(s.weight, s.weight_unit)}${units}` : ""}`)
+      .join(", ");
     return `<div class="checklist-item">
       <div class="title">${escapeHtml(e.exercise)}</div>
       <div class="meta">${setsText}${e.note ? ` · ${escapeHtml(e.note)}` : ""}</div>

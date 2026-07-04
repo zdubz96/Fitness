@@ -14,28 +14,50 @@ export async function sendMessage(system, messages, opts = {}) {
   const { anthropicKey } = getSettings();
   if (!anthropicKey) throw new Error("Anthropic API key is not configured yet.");
 
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": anthropicKey,
-      "anthropic-version": "2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: opts.maxTokens || 2048,
-      system,
-      messages,
-    }),
+  const body = JSON.stringify({
+    model: MODEL,
+    max_tokens: opts.maxTokens || 2048,
+    system,
+    messages,
   });
 
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Anthropic API error ${res.status}: ${body}`);
+  // Mobile browsers (esp. iOS Safari) throw an opaque "Load failed"/"Failed to fetch" when a
+  // long request is dropped mid-flight. Give each attempt a generous timeout and retry once on
+  // a pure network failure (never on a real API error, which we surface immediately).
+  const TIMEOUT_MS = 90000;
+  let lastErr;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-api-key": anthropicKey,
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true",
+        },
+        body,
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Anthropic API error ${res.status}: ${errText}`);
+      }
+      const json = await res.json();
+      return (json.content || []).map((block) => block.text || "").join("");
+    } catch (e) {
+      clearTimeout(timer);
+      // Real API errors (4xx/5xx) shouldn't be retried — only network/abort failures.
+      if (e.message && e.message.startsWith("Anthropic API error")) throw e;
+      lastErr = e;
+      if (attempt === 0) continue; // one retry
+    }
   }
-  const body = await res.json();
-  return (body.content || []).map((block) => block.text || "").join("");
+  const reason = lastErr?.name === "AbortError" ? "timed out" : "network request failed";
+  throw new Error(`Couldn't reach the coach (${reason}). Check your connection and try again.`);
 }
 
 /** Same as sendMessage but parses the reply as JSON, stripping ```json fences if present. */

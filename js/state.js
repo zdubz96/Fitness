@@ -14,6 +14,7 @@ export const DATA_FILES = {
   trainer_profile: "data/trainer_profile.json",
   coach_chats: "data/coach_chats.json",
   weekly_reviews: "data/weekly_reviews.json",
+  body_metrics: "data/body_metrics.json",
 };
 
 const DEFAULTS = {
@@ -26,6 +27,7 @@ const DEFAULTS = {
   trainer_profile: {},
   coach_chats: [],
   weekly_reviews: [],
+  body_metrics: [],
 };
 
 function cacheKey(name) {

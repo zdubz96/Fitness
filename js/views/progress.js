@@ -2,6 +2,7 @@ import { getLocal, refresh, save } from "../state.js";
 import { lineChart, barChart } from "../lib/charts.js";
 import { estimateGoalProgress } from "../lib/goals.js";
 import { toast } from "../components/toast.js";
+import { unitLabel, displayWeight } from "../lib/units.js";
 
 function daysAgo(dateStr) {
   return Math.floor((Date.now() - new Date(dateStr + "T00:00:00").getTime()) / 86400000);
@@ -22,16 +23,24 @@ export async function render(container) {
   let wellness = getLocal("garmin_wellness");
   let reviews = getLocal("weekly_reviews");
   let goals = getLocal("goals");
+  let bodyMetrics = getLocal("body_metrics");
+  const units = unitLabel();
 
   paint();
-  Promise.all([refresh("exercise_log"), refresh("garmin_activities"), refresh("garmin_wellness"), refresh("weekly_reviews"), refresh("goals")])
-    .then(([l, a, w, r, g]) => { log = l; activities = a; wellness = w; reviews = r; goals = g; paint(); })
+  Promise.all([refresh("exercise_log"), refresh("garmin_activities"), refresh("garmin_wellness"), refresh("weekly_reviews"), refresh("goals"), refresh("body_metrics")])
+    .then(([l, a, w, r, g, b]) => { log = l; activities = a; wellness = w; reviews = r; goals = g; bodyMetrics = b; paint(); })
     .catch(() => {});
 
   function paint() {
+    // Volume in the current display unit (convert each set's weight from the unit it was logged in).
     const volumeSeries = weekBuckets(log, (e) => e.date, (e) =>
-      e.sets.reduce((sum, s) => sum + (s.reps || 0) * (s.weight || 0), 0)
+      e.sets.reduce((sum, s) => sum + (s.reps || 0) * (displayWeight(s.weight, s.weight_unit) || 0), 0)
     );
+
+    const bodyWeightSeries = bodyMetrics
+      .slice()
+      .sort((a, b) => (a.date < b.date ? -1 : 1))
+      .map((b) => ({ value: displayWeight(b.weight, b.weight_unit) }));
 
     const exerciseCounts = {};
     log.forEach((e) => { exerciseCounts[e.exercise] = (exerciseCounts[e.exercise] || 0) + 1; });
@@ -47,8 +56,13 @@ export async function render(container) {
       <h1>Progress</h1>
 
       <div class="card">
-        <h2>Volume (weekly, 12wk)</h2>
+        <h2>Volume (weekly, 12wk · ${units})</h2>
         ${barChart(volumeSeries, { height: 100 })}
+      </div>
+
+      <div class="card">
+        <h2>Body weight (${units})</h2>
+        ${bodyWeightSeries.length ? lineChart(bodyWeightSeries, { height: 90, color: "#fbbf24" }) : `<p>Log your body weight in the Log tab to see a trend.</p>`}
       </div>
 
       <div class="card">
@@ -129,12 +143,12 @@ export async function render(container) {
       .filter((e) => e.exercise === name)
       .sort((a, b) => (a.date < b.date ? -1 : 1));
     const series = entries.map((e) => {
-      const best = Math.max(...e.sets.map((s) => epley1RM(s.weight, s.reps) || 0));
+      const best = Math.max(...e.sets.map((s) => epley1RM(displayWeight(s.weight, s.weight_unit), s.reps) || 0));
       return { value: best || null };
     });
     const latest = [...series].reverse().find((p) => p.value)?.value;
     return `<div style="margin-bottom:14px">
-      <div class="row"><strong>${escapeHtml(name)}</strong>${latest ? `<span>${latest.toFixed(0)} est. 1RM</span>` : ""}</div>
+      <div class="row"><strong>${escapeHtml(name)}</strong>${latest ? `<span>${latest.toFixed(0)} ${units} est. 1RM</span>` : ""}</div>
       ${lineChart(series, { height: 80 })}
     </div>`;
   }

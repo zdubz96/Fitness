@@ -73,30 +73,37 @@ export async function submitBaselineResults(results) {
     { maxTokens: 1536 }
   );
 
+  const units = profile.units || "lb";
   const nextProfile = {
     ...profile,
-    baseline: { ...baseline, assessed_at: new Date().toISOString(), raw_results: payload },
+    baseline: { ...baseline, units, assessed_at: new Date().toISOString(), raw_results: payload },
   };
   delete nextProfile.pending_assessment;
+  // The baseline itself is the important artifact — save it first so a later blip can't lose it.
   await save("trainer_profile", nextProfile, "chore: save fitness baseline");
 
-  // Log strength results into the exercise log so 1RM trends start from the baseline.
-  const today = new Date();
-  const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-  const logEntries = payload
-    .filter((t) => t.category === "strength" && t.result && typeof t.result === "object" && t.result.weight && t.result.reps)
-    .map((t) => ({
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      date: dateStr,
-      exercise: t.name,
-      sets: [{ reps: Number(t.result.reps), weight: Number(t.result.weight) }],
-      note: "Baseline assessment",
-      source: "assessment",
-      created_at: new Date().toISOString(),
-    }));
-  if (logEntries.length) {
-    const log = getLocal("exercise_log");
-    await save("exercise_log", [...log, ...logEntries], "log: baseline assessment results");
+  // Best-effort: seed strength results into the exercise log so 1RM trends start from the
+  // baseline. If this save fails (transient network), the baseline is already safely stored.
+  try {
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const logEntries = payload
+      .filter((t) => t.category === "strength" && t.result && typeof t.result === "object" && t.result.weight && t.result.reps)
+      .map((t) => ({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        date: dateStr,
+        exercise: t.name,
+        sets: [{ reps: Number(t.result.reps), weight: Number(t.result.weight), weight_unit: units }],
+        note: "Baseline assessment",
+        source: "assessment",
+        created_at: new Date().toISOString(),
+      }));
+    if (logEntries.length) {
+      const log = getLocal("exercise_log");
+      await save("exercise_log", [...log, ...logEntries], "log: baseline assessment results");
+    }
+  } catch (e) {
+    console.warn("baseline saved, but seeding exercise log failed", e);
   }
 
   return nextProfile.baseline;

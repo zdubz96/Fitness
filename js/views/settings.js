@@ -2,6 +2,7 @@ import { getSettings, saveSettings, isConfigured, refreshAll, getLocal, save } f
 import { triggerGarminSync } from "../github.js";
 import { toast } from "../components/toast.js";
 import { estimateMaxHR, defaultZones } from "../lib/zones.js";
+import { cmToFtIn, ftInToCm } from "../lib/units.js";
 
 export async function render(container) {
   const s = getSettings();
@@ -11,6 +12,9 @@ export async function render(container) {
   const estMaxHR = age ? estimateMaxHR(age) : null;
   const maxHR = profile.max_hr || estMaxHR || "";
   const zones = profile.zones || (maxHR ? defaultZones(maxHR) : null);
+  const units = profile.units || "lb";
+  const heightCm = profile.height_cm ?? null;
+  const heightFtIn = heightCm != null ? cmToFtIn(heightCm) : { ft: "", inches: "" };
 
   container.innerHTML = `
     ${!wasConfigured ? `<div class="card"><h1>Welcome</h1><p>Enter your GitHub and Anthropic credentials to get started. Both are stored only in this browser's local storage — never committed.</p></div>` : `<h1>Settings</h1>`}
@@ -39,6 +43,24 @@ export async function render(container) {
     </div>
 
     ${wasConfigured ? `
+    <div class="card stack">
+      <h2>Units &amp; body</h2>
+      <label for="units">Weight units</label>
+      <select id="units">
+        <option value="lb" ${units === "lb" ? "selected" : ""}>Pounds (lb)</option>
+        <option value="kg" ${units === "kg" ? "selected" : ""}>Kilograms (kg)</option>
+      </select>
+      <label>Height</label>
+      <div id="height-metric" style="${units === "kg" ? "" : "display:none"}">
+        <input id="height-cm" type="number" inputmode="numeric" placeholder="cm" value="${heightCm != null ? Math.round(heightCm) : ""}" />
+      </div>
+      <div id="height-imperial" class="grid-2" style="${units === "kg" ? "display:none" : ""}">
+        <input id="height-ft" type="number" inputmode="numeric" placeholder="ft" value="${heightFtIn.ft}" />
+        <input id="height-in" type="number" inputmode="numeric" placeholder="in" value="${heightFtIn.inches}" />
+      </div>
+      <button id="save-body" class="secondary">Save units &amp; height</button>
+    </div>
+
     <div class="card stack">
       <h2>Garmin Sync</h2>
       <p>Triggers the garmin-sync GitHub Action immediately.</p>
@@ -90,6 +112,35 @@ export async function render(container) {
       } finally {
         syncBtn.disabled = false;
         syncBtn.textContent = "Sync now";
+      }
+    });
+  }
+
+  const unitsSelect = document.getElementById("units");
+  if (unitsSelect) {
+    unitsSelect.addEventListener("change", () => {
+      const kg = unitsSelect.value === "kg";
+      document.getElementById("height-metric").style.display = kg ? "" : "none";
+      document.getElementById("height-imperial").style.display = kg ? "none" : "";
+    });
+    document.getElementById("save-body").addEventListener("click", async () => {
+      const newUnits = unitsSelect.value;
+      let cm = null;
+      if (newUnits === "kg") {
+        const v = Number(document.getElementById("height-cm").value);
+        cm = v || null;
+      } else {
+        const ft = Number(document.getElementById("height-ft").value);
+        const inches = Number(document.getElementById("height-in").value);
+        cm = ft || inches ? ftInToCm(ft, inches) : null;
+      }
+      const updated = { ...getLocal("trainer_profile"), units: newUnits };
+      if (cm != null) updated.height_cm = cm;
+      try {
+        await save("trainer_profile", updated, "chore: update units & height");
+        toast("Saved", "success");
+      } catch (e) {
+        toast(e.message, "error");
       }
     });
   }

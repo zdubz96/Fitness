@@ -1,6 +1,7 @@
 import { getLocal } from "../state.js";
 import { generateBaselineAssessment, submitBaselineResults } from "../lib/assessment.js";
 import { toast } from "../components/toast.js";
+import { unitLabel } from "../lib/units.js";
 
 function escapeHtml(str) {
   const div = document.createElement("div");
@@ -85,7 +86,7 @@ function renderAssessment(container, assessment) {
 function renderTest(t) {
   const inputs = {
     weight_reps: `<div class="grid-2">
-        <div><label>Weight</label><input type="number" inputmode="decimal" data-test="${t.id}" data-field="weight" /></div>
+        <div><label>Weight (${unitLabel()})</label><input type="number" inputmode="decimal" data-test="${t.id}" data-field="weight" /></div>
         <div><label>Reps</label><input type="number" inputmode="numeric" data-test="${t.id}" data-field="reps" /></div>
       </div>`,
     reps: `<label>${escapeHtml(t.record_label || "Reps")}</label><input type="number" inputmode="numeric" data-test="${t.id}" data-field="value" />`,

@@ -21,7 +21,10 @@ export function buildCoachContext() {
   const exerciseLog = getLocal("exercise_log") || [];
   const workouts = getLocal("workouts") || [];
   const reviews = getLocal("weekly_reviews") || [];
+  const bodyMetrics = getLocal("body_metrics") || [];
 
+  const units = profile.units || "lb";
+  const latestBodyWeight = bodyMetrics.length ? bodyMetrics[bodyMetrics.length - 1] : null;
   const recovery = computeRecoveryStatus({ wellness, health, activities });
   const last14Activities = activities.filter((a) => daysAgo(a.date) < 14);
   const last14Wellness = wellness.filter((w) => daysAgo(w.date) < 14);
@@ -34,6 +37,8 @@ export function buildCoachContext() {
   return {
     today,
     profile,
+    units,
+    latestBodyWeight,
     goals,
     recovery,
     last14Activities,
@@ -49,6 +54,8 @@ export function buildCoachContext() {
 export function contextToPromptText(ctx) {
   return `
 TODAY'S DATE: ${ctx.today}
+UNITS: all weights are in ${ctx.units}. Use ${ctx.units} in any prescriptions or numbers you give.
+${ctx.latestBodyWeight ? `CURRENT BODY WEIGHT: ${ctx.latestBodyWeight.weight} ${ctx.latestBodyWeight.weight_unit || ctx.units} (logged ${ctx.latestBodyWeight.date})` : ""}
 
 TRAINER PROFILE:
 ${JSON.stringify(ctx.profile, null, 2)}
