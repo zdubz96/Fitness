@@ -70,7 +70,7 @@ export async function submitBaselineResults(results) {
   const baseline = await sendMessageForJSON(
     DISTILL_PROMPT,
     [{ role: "user", content: `Tests and results: ${JSON.stringify(payload)}\n\n${contextToPromptText(ctx)}` }],
-    { maxTokens: 1536 }
+    { maxTokens: 3000 }
   );
 
   const units = profile.units || "lb";

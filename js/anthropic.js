@@ -60,13 +60,67 @@ export async function sendMessage(system, messages, opts = {}) {
   throw new Error(`Couldn't reach the coach (${reason}). Check your connection and try again.`);
 }
 
-/** Same as sendMessage but parses the reply as JSON, stripping ```json fences if present. */
+/**
+ * Extract the first complete JSON object/array from a string, tolerating prose before/after,
+ * ```json fences, and trailing chatter. Uses brace matching (string-aware) so nested braces
+ * don't trip it up.
+ */
+function extractJSON(text) {
+  // Fast path: already clean or simply fenced.
+  const fenced = text.trim().replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
+  try {
+    return JSON.parse(fenced);
+  } catch {
+    /* fall through to brace scanning */
+  }
+
+  const startIdx = (() => {
+    const obj = text.indexOf("{");
+    const arr = text.indexOf("[");
+    if (obj === -1) return arr;
+    if (arr === -1) return obj;
+    return Math.min(obj, arr);
+  })();
+  if (startIdx === -1) return null;
+
+  const open = text[startIdx];
+  const close = open === "{" ? "}" : "]";
+  let depth = 0;
+  let inStr = false;
+  let escaped = false;
+  for (let i = startIdx; i < text.length; i++) {
+    const ch = text[i];
+    if (inStr) {
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === '"') inStr = false;
+      continue;
+    }
+    if (ch === '"') inStr = true;
+    else if (ch === open) depth++;
+    else if (ch === close) {
+      depth--;
+      if (depth === 0) {
+        const candidate = text.slice(startIdx, i + 1);
+        try {
+          return JSON.parse(candidate);
+        } catch {
+          return null;
+        }
+      }
+    }
+  }
+  return null; // never closed -> likely truncated
+}
+
+/** Same as sendMessage but parses the reply as JSON, tolerating fences and surrounding prose. */
 export async function sendMessageForJSON(system, messages, opts = {}) {
   const text = await sendMessage(system, messages, opts);
-  const cleaned = text.trim().replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
-  try {
-    return JSON.parse(cleaned);
-  } catch (e) {
-    throw new Error(`Coach reply was not valid JSON: ${e.message}\n${text}`);
+  const parsed = extractJSON(text);
+  if (parsed === null) {
+    throw new Error(
+      `The coach's response couldn't be read as structured data (it may have been cut off). Please try again.\n\nRaw reply:\n${text.slice(0, 500)}`
+    );
   }
+  return parsed;
 }
