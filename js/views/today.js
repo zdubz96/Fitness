@@ -2,14 +2,19 @@ import { getLocal, refresh, save } from "../state.js";
 import { computeRecoveryStatus } from "../lib/recovery.js";
 import { showRestTimer } from "../components/timer.js";
 import { toast } from "../components/toast.js";
-import { generateTodayWorkout } from "../lib/workoutgen.js";
 import { requestExerciseAdjustment, applyAdjustmentToTodaysWorkout } from "../lib/adjust.js";
 import { needsWeeklyReview, generateWeeklyReview } from "../lib/weeklyreview.js";
+import {
+  generateWeeklyProgram,
+  programDays,
+  activeProgram,
+  setDayStatus,
+  hasMissedDays,
+  readjustRemainingWeek,
+  todayStr,
+} from "../lib/program.js";
 
-function todayStr() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
+const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 function escapeHtml(str) {
   const div = document.createElement("div");
@@ -17,17 +22,23 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+function dowLabel(dateStr) {
+  return DOW[new Date(dateStr + "T00:00:00").getDay()];
+}
+
+const STATUS_DOT = { completed: "🟢", missed: "🔴", rest: "⚪", planned: "🔵" };
+
 export async function render(container) {
   let wellness = getLocal("garmin_wellness");
   let health = getLocal("garmin_health");
   let activities = getLocal("garmin_activities");
   let workouts = getLocal("workouts");
   let reviews = getLocal("weekly_reviews");
+  let selectedDate = todayStr();
 
   paint();
 
-  // Refresh from GitHub in the background, repaint if anything changed.
-  Promise.all([refresh("garmin_wellness"), refresh("garmin_health"), refresh("garmin_activities"), refresh("workouts")])
+  Promise.all([refresh("garmin_wellness"), refresh("garmin_health"), refresh("garmin_activities"), refresh("workouts"), refresh("trainer_profile")])
     .then(([w, h, a, wk]) => {
       wellness = w; health = h; activities = a; workouts = wk;
       paint();
@@ -38,15 +49,15 @@ export async function render(container) {
     const recovery = computeRecoveryStatus({ wellness, health, activities });
     const today = todayStr();
     const todaysWellness = wellness.find((w) => w.date === today) || {};
-    const todaysWorkout = workouts.find((w) => w.date === today);
-    const recent7Load = activities
-      .filter((a) => a.training_load)
-      .slice(-7)
-      .reduce((sum, a) => sum + (a.training_load || 0), 0);
+    const recent7Load = activities.filter((a) => a.training_load).slice(-7).reduce((s, a) => s + (a.training_load || 0), 0);
 
     const showReviewBanner = needsWeeklyReview(reviews);
     const profile = getLocal("trainer_profile") || {};
     const showAssessmentBanner = !profile.baseline;
+    const program = activeProgram();
+    const days = programDays();
+    if (!days.some((d) => d.date === selectedDate)) selectedDate = today;
+    const selected = days.find((d) => d.date === selectedDate);
 
     container.innerHTML = `
       <h1>Today</h1>
@@ -88,61 +99,64 @@ export async function render(container) {
         </div>
       </div>
 
-      <div class="card">
-        <h2>Today's Workout</h2>
-        ${todaysWorkout ? renderWorkout(todaysWorkout) : `<p>No workout planned for today yet.</p><button id="gen-workout">Generate today's workout</button>`}
-        ${todaysWorkout && !todaysWorkout.feedback ? `<button id="finish-workout" class="secondary" style="margin-top:10px;width:100%">Finish workout</button>` : ""}
-        ${todaysWorkout?.feedback ? `<p style="margin-top:10px;font-size:13px">Feedback logged: <strong>${escapeHtml(todaysWorkout.feedback.difficulty)}</strong>${todaysWorkout.feedback.note ? ` — ${escapeHtml(todaysWorkout.feedback.note)}` : ""}</p>` : ""}
-      </div>
+      ${program ? renderProgram(days, selected, today) : renderNoProgram()}
     `;
 
     document.getElementById("recovery-card").addEventListener("click", () => showRecoveryModal(recovery));
-
-    const reviewBtn = document.getElementById("gen-review");
-    if (reviewBtn) {
-      reviewBtn.addEventListener("click", async () => {
-        reviewBtn.disabled = true;
-        reviewBtn.textContent = "Generating...";
-        try {
-          await generateWeeklyReview();
-          reviews = getLocal("weekly_reviews");
-          toast("Weekly review ready — see Progress tab", "success");
-          paint();
-        } catch (e) {
-          toast(e.message, "error");
-          reviewBtn.disabled = false;
-          reviewBtn.textContent = "Generate";
-        }
-      });
-    }
-
-    const finishBtn = document.getElementById("finish-workout");
-    if (finishBtn) finishBtn.addEventListener("click", () => showFeedbackModal(todaysWorkout));
-
-    if (todaysWorkout) { wireWorkout(todaysWorkout); wireLongPress(todaysWorkout); }
-
-    const genBtn = document.getElementById("gen-workout");
-    if (genBtn) {
-      genBtn.addEventListener("click", async () => {
-        genBtn.disabled = true;
-        genBtn.textContent = "Generating...";
-        try {
-          const workout = await generateTodayWorkout();
-          workouts = getLocal("workouts");
-          toast("Workout generated", "success");
-          paint();
-        } catch (e) {
-          toast(e.message, "error");
-          genBtn.disabled = false;
-          genBtn.textContent = "Generate today's workout";
-        }
-      });
-    }
+    wireReviewBanner();
+    if (program) wireProgram(days, selected, today);
+    else wireGenerateProgram();
   }
 
-  function renderWorkout(workout) {
-    const rationale = workout.rationale ? `<p style="font-style:italic">"${escapeHtml(workout.rationale)}"</p>` : "";
-    const exercises = workout.exercises
+  function renderNoProgram() {
+    return `<div class="card stack">
+      <h2>This week's program</h2>
+      <p>Your coach will build a rolling 7-day plan from today — training days, rest days, and specific exercises tailored to your schedule, goals, and recovery.</p>
+      <button id="gen-program">Generate this week's program</button>
+    </div>`;
+  }
+
+  function renderProgram(days, selected, today) {
+    const strip = days
+      .map((d) => {
+        const isSel = d.date === selectedDate;
+        const isToday = d.date === today;
+        const dot = STATUS_DOT[d.status] || STATUS_DOT.planned;
+        return `<button type="button" class="day-chip ${isSel ? "sel" : ""}" data-date="${d.date}"
+          style="flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:64px;padding:8px 6px;border-radius:12px;border:1px solid ${isSel ? "var(--accent)" : "var(--border)"};background:${isSel ? "var(--bg-elev-2)" : "var(--bg-elev)"};color:var(--text)">
+          <span style="font-size:11px;color:var(--text-dim)">${dowLabel(d.date)}${isToday ? " •" : ""}</span>
+          <span style="font-size:15px">${dot}</span>
+          <span style="font-size:10px;color:var(--text-dim);max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(d.is_rest_day ? "Rest" : d.focus)}</span>
+        </button>`;
+      })
+      .join("");
+
+    return `
+      <div class="card">
+        <div class="row"><h2 style="margin:0">This week</h2>${hasMissedDays() ? `<button id="readjust" class="ghost">Readjust week</button>` : ""}</div>
+        <div style="display:flex;gap:6px;overflow-x:auto;padding:8px 2px 4px">${strip}</div>
+      </div>
+      <div class="card" id="day-detail">
+        ${selected ? renderDayDetail(selected, today) : `<p>Pick a day.</p>`}
+      </div>
+    `;
+  }
+
+  function renderDayDetail(day, today) {
+    const isToday = day.date === today;
+    const statusBadge = { completed: "green", missed: "red", rest: "yellow", planned: "yellow" }[day.status] || "yellow";
+    const statusText = { completed: "Completed", missed: "Missed", rest: "Rest day", planned: "Planned" }[day.status] || day.status;
+    const header = `<div class="row">
+      <div><strong>${dowLabel(day.date)}${isToday ? " (today)" : ""}</strong> · ${escapeHtml(day.focus)}${day.duration_min ? ` · ~${day.duration_min}m` : ""}</div>
+      <span class="badge ${statusBadge}">${statusText}</span>
+    </div>`;
+
+    if (day.is_rest_day) {
+      return `${header}<p style="margin-top:10px">${escapeHtml(day.rationale || "Recovery day — rest, walk, mobility, and eat well.")}</p>`;
+    }
+
+    const rationale = day.rationale ? `<p style="font-style:italic;margin-top:8px">"${escapeHtml(day.rationale)}"</p>` : "";
+    const exercises = day.exercises
       .map((ex, exIdx) => {
         const completed = ex.completed_sets || [];
         const setsHtml = Array.from({ length: ex.sets || 1 })
@@ -150,20 +164,112 @@ export async function render(container) {
             const done = completed[setIdx];
             return `<label style="display:flex;align-items:center;gap:8px;padding:4px 0">
               <input type="checkbox" data-ex="${exIdx}" data-set="${setIdx}" ${done ? "checked" : ""} style="width:20px;height:20px" />
-              <span>Set ${setIdx + 1}: ${ex.reps} reps${ex.rpe_target ? ` @ RPE ${ex.rpe_target}` : ""}</span>
+              <span>Set ${setIdx + 1}: ${escapeHtml(String(ex.reps))} reps${ex.rpe_target ? ` @ RPE ${ex.rpe_target}` : ""}</span>
             </label>`;
           })
           .join("");
         const allDone = completed.length && completed.filter(Boolean).length === (ex.sets || 1);
         return `<div class="checklist-item ${allDone ? "done" : ""}" data-exercise-idx="${exIdx}" data-exercise-name="${escapeHtml(ex.name)}">
           <div class="title">${escapeHtml(ex.name)}</div>
-          <div class="meta">${ex.sets}x${ex.reps} · rest ${ex.rest_seconds}s${ex.notes ? ` · ${escapeHtml(ex.notes)}` : ""}</div>
+          <div class="meta">${ex.sets}x${escapeHtml(String(ex.reps))} · rest ${ex.rest_seconds}s${ex.notes ? ` · ${escapeHtml(ex.notes)}` : ""}</div>
           <div style="margin-top:6px">${setsHtml}</div>
-          <div style="margin-top:4px;font-size:11px;color:var(--text-dim)">Long-press to talk to coach about this exercise</div>
+          ${isToday ? `<div style="margin-top:4px;font-size:11px;color:var(--text-dim)">Long-press to talk to coach about this exercise</div>` : ""}
         </div>`;
       })
       .join("");
-    return `${rationale}${exercises}`;
+
+    const actions = `<div class="grid-2" style="margin-top:12px">
+      <button class="mark-done">${day.status === "completed" ? "✓ Done" : "Mark done"}</button>
+      <button class="mark-missed secondary">${day.status === "missed" ? "Missed" : "Mark missed"}</button>
+    </div>
+    ${day.feedback ? `<p style="margin-top:10px;font-size:13px">Feedback: <strong>${escapeHtml(day.feedback.difficulty)}</strong>${day.feedback.note ? ` — ${escapeHtml(day.feedback.note)}` : ""}</p>` : ""}`;
+
+    return `${header}${rationale}${exercises}${actions}`;
+  }
+
+  // ---- wiring ----
+
+  function wireReviewBanner() {
+    const reviewBtn = document.getElementById("gen-review");
+    if (!reviewBtn) return;
+    reviewBtn.addEventListener("click", async () => {
+      reviewBtn.disabled = true;
+      reviewBtn.textContent = "Generating...";
+      try {
+        await generateWeeklyReview();
+        reviews = getLocal("weekly_reviews");
+        toast("Weekly review ready — see Progress tab", "success");
+        paint();
+      } catch (e) {
+        toast(e.message, "error");
+        reviewBtn.disabled = false;
+        reviewBtn.textContent = "Generate";
+      }
+    });
+  }
+
+  function wireGenerateProgram() {
+    const btn = document.getElementById("gen-program");
+    if (!btn) return;
+    btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      btn.textContent = "Building your week...";
+      try {
+        await generateWeeklyProgram();
+        workouts = getLocal("workouts");
+        selectedDate = todayStr();
+        toast("Weekly program ready", "success");
+        paint();
+      } catch (e) {
+        toast(e.message, "error");
+        btn.disabled = false;
+        btn.textContent = "Generate this week's program";
+      }
+    });
+  }
+
+  function wireProgram(days, selected, today) {
+    container.querySelectorAll(".day-chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        selectedDate = chip.dataset.date;
+        paint();
+      });
+    });
+
+    const readjustBtn = document.getElementById("readjust");
+    if (readjustBtn) {
+      readjustBtn.addEventListener("click", async () => {
+        if (!confirm("Ask the coach to rework the rest of your week around what you missed?")) return;
+        readjustBtn.disabled = true;
+        readjustBtn.textContent = "Reworking...";
+        try {
+          await readjustRemainingWeek();
+          workouts = getLocal("workouts");
+          toast("Week readjusted", "success");
+          paint();
+        } catch (e) {
+          toast(e.message, "error");
+          readjustBtn.disabled = false;
+          readjustBtn.textContent = "Readjust week";
+        }
+      });
+    }
+
+    if (!selected || selected.is_rest_day) return;
+    wireWorkout(selected);
+    if (selected.date === today) wireLongPress(selected);
+
+    container.querySelector(".mark-done")?.addEventListener("click", () => showFeedbackModal(selected));
+    container.querySelector(".mark-missed")?.addEventListener("click", async () => {
+      try {
+        await setDayStatus(selected.date, "missed");
+        workouts = getLocal("workouts");
+        toast("Marked missed — tap Readjust week to rework the plan", "");
+        paint();
+      } catch (e) {
+        toast(e.message, "error");
+      }
+    });
   }
 
   function wireWorkout(workout) {
@@ -180,6 +286,7 @@ export async function render(container) {
         if (idx >= 0) allWorkouts[idx] = workout;
         try {
           await save("workouts", allWorkouts, "chore: update workout progress");
+          workouts = allWorkouts;
         } catch (err) {
           toast(err.message, "error");
         }
@@ -196,6 +303,7 @@ export async function render(container) {
       });
     });
   }
+
   function wireLongPress(workout) {
     container.querySelectorAll(".checklist-item[data-exercise-idx]").forEach((item) => {
       let timer = null;
@@ -240,7 +348,7 @@ export async function render(container) {
       submitBtn.textContent = "Thinking...";
       try {
         const adjustment = await requestExerciseAdjustment(exercise, note);
-        await applyAdjustmentToTodaysWorkout(exIdx, adjustment, note);
+        await applyAdjustmentToTodaysWorkout(exIdx, adjustment, note, workout.date);
         workouts = getLocal("workouts");
         overlay.remove();
         toast(adjustment.reason || "Exercise updated", "success");
@@ -267,7 +375,7 @@ export async function render(container) {
         </div>
         <label for="fb-note">Note (optional)</label>
         <textarea id="fb-note" placeholder="Anything the coach should know?"></textarea>
-        <button id="fb-submit" style="margin-top:10px;width:100%" disabled>Submit</button>
+        <button id="fb-submit" style="margin-top:10px;width:100%" disabled>Submit &amp; mark done</button>
       </div>
     `;
     document.body.appendChild(overlay);
@@ -283,6 +391,7 @@ export async function render(container) {
     overlay.querySelector("#fb-submit").addEventListener("click", async () => {
       const note = overlay.querySelector("#fb-note").value.trim();
       workout.feedback = { difficulty: chosen, note: note || null, at: new Date().toISOString() };
+      workout.status = "completed";
 
       const allWorkouts = getLocal("workouts");
       const idx = allWorkouts.findIndex((w) => w.date === workout.date);
@@ -294,7 +403,7 @@ export async function render(container) {
           id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           date: workout.date,
           exercise: ex.name,
-          sets: (ex.completed_sets || []).map((done, i) => (done ? { reps: ex.reps, weight: null } : null)).filter(Boolean),
+          sets: (ex.completed_sets || []).map((done) => (done ? { reps: ex.reps, weight: null } : null)).filter(Boolean),
           note: null,
           source: "planned",
           feedback: workout.feedback,
@@ -303,12 +412,13 @@ export async function render(container) {
 
       try {
         await save("workouts", allWorkouts, "chore: post-workout feedback");
+        workouts = allWorkouts;
         if (logEntries.length) {
           const log = getLocal("exercise_log");
           await save("exercise_log", [...log, ...logEntries], "log: planned workout completion");
         }
         overlay.remove();
-        toast("Thanks — logged", "success");
+        toast("Nice work — logged", "success");
         paint();
       } catch (e) {
         toast(e.message, "error");

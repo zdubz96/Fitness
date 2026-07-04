@@ -21,12 +21,13 @@ export async function requestExerciseAdjustment(exercise, userNote) {
   return result; // { updated_exercise, reason }
 }
 
-/** Applies an adjustment to today's workout in place and persists it. */
-export async function applyAdjustmentToTodaysWorkout(exerciseIdx, adjustment, originalNote) {
+/** Applies an adjustment to the workout on the given date (defaults to today) in place. */
+export async function applyAdjustmentToTodaysWorkout(exerciseIdx, adjustment, originalNote, date) {
   const workouts = getLocal("workouts");
   const ctx = buildCoachContext();
-  const idx = workouts.findIndex((w) => w.date === ctx.today);
-  if (idx < 0) throw new Error("Today's workout not found");
+  const targetDate = date || ctx.today;
+  const idx = workouts.findIndex((w) => w.date === targetDate);
+  if (idx < 0) throw new Error("Workout not found for that day");
   const workout = workouts[idx];
   const original = workout.exercises[exerciseIdx];
   workout.exercises[exerciseIdx] = {
