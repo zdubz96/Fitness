@@ -5,6 +5,7 @@
 import { sendMessageForJSON } from "../anthropic.js";
 import { buildCoachContext, contextToPromptText } from "./context.js";
 import { getLocal, save } from "../state.js";
+import { COACHING_PRINCIPLES } from "./principles.js";
 
 export function todayStr() {
   const d = new Date();
@@ -28,7 +29,9 @@ const DAY_SCHEMA = `{
   "rationale": string        // one short sentence
 }`;
 
-const GENERATE_PROMPT = `You are an AI personal trainer building a client's 7-day training program
+const GENERATE_PROMPT = `${COACHING_PRINCIPLES}
+
+You are an AI personal trainer building a client's 7-day training program
 (a rolling week starting today, day_offset 0). Use their full context: profile (experience,
 injuries, equipment, SCHEDULE / days-per-week available, preferences, goals), baseline (anchor
 starting loads to it), recovery indicators, recent Garmin data and logs.
@@ -46,7 +49,9 @@ Rules:
 Respond with ONLY a JSON object (no markdown fences, no commentary):
 { "days": [ ${DAY_SCHEMA} ] }`;
 
-const READJUST_PROMPT = `You are an AI personal trainer REVISING the remainder of a client's current
+const READJUST_PROMPT = `${COACHING_PRINCIPLES}
+
+You are an AI personal trainer REVISING the remainder of a client's current
 7-day program because they missed one or more sessions (or need it reworked). You are given the
 full week with each day's status (completed / missed / planned / rest) and the exact dates that
 still need a plan. Keep already-completed days as they are (do not resend them). Redistribute the

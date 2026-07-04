@@ -1,8 +1,11 @@
 import { sendMessageForJSON } from "../anthropic.js";
 import { buildCoachContext, contextToPromptText } from "./context.js";
 import { getLocal, save } from "../state.js";
+import { COACHING_PRINCIPLES } from "./principles.js";
 
-const GENERATE_PROMPT = `You are an AI personal trainer designing a one-session BASELINE DIAGNOSTIC
+const GENERATE_PROMPT = `${COACHING_PRINCIPLES}
+
+You are an AI personal trainer designing a one-session BASELINE DIAGNOSTIC
 for a new client, based on their onboarding profile (experience, injuries, equipment, schedule,
 goals, cardio history, age/sex) and any Garmin data available. The goal is to measure where they
 are right now so future programming and progress tracking have an accurate starting point.

@@ -1,19 +1,22 @@
 import { getLocal, refresh, save } from "../state.js";
 import { sendMessage } from "../anthropic.js";
 import { buildCoachContext, contextToPromptText } from "../lib/context.js";
+import { COACHING_PRINCIPLES } from "../lib/principles.js";
 import { toast } from "../components/toast.js";
 
 const SUMMARIZE_THRESHOLD = 40; // messages
 const KEEP_RECENT = 16;
 
 function systemPrompt(ctx) {
-  return `You are the client's ongoing AI personal trainer, chatting with them anytime — about
+  return `${COACHING_PRINCIPLES}
+
+You are the client's ongoing AI personal trainer, chatting with them anytime — about
 form questions, soreness, exercise swaps, motivation, or anything training-related. Be warm,
-direct, and concrete. Use the context below (their profile, goals, recent Garmin data, recent
-logs, today's planned workout, recovery indicators, latest weekly review) to ground your
-answers. Proactively flag accumulating fatigue if the recovery indicators warrant it, even if
-not asked. Keep replies conversational — a few sentences, not an essay, unless they ask for
-depth.
+direct, and concrete. Ground any programming advice in the coaching principles above. Use the
+context below (their profile, goals, recent Garmin data, recent logs, today's planned workout,
+recovery indicators, latest weekly review) to ground your answers. Proactively flag accumulating
+fatigue if the recovery indicators warrant it, even if not asked. Keep replies conversational —
+a few sentences, not an essay, unless they ask for depth.
 
 ${contextToPromptText(ctx)}`;
 }

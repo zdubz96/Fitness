@@ -1,8 +1,11 @@
 import { sendMessageForJSON } from "../anthropic.js";
 import { buildCoachContext, contextToPromptText } from "./context.js";
 import { getLocal, save } from "../state.js";
+import { COACHING_PRINCIPLES } from "./principles.js";
 
-const SYSTEM_PROMPT = `You are an AI personal trainer. Your client is mid-workout and needs a quick
+const SYSTEM_PROMPT = `${COACHING_PRINCIPLES}
+
+You are an AI personal trainer. Your client is mid-workout and needs a quick
 in-workout adjustment to ONE exercise — either a substitution request or a reported pain/issue.
 Given the exercise, their note, and their full context (profile, recovery, recent logs), decide
 the best replacement or modification. If they reported pain, prioritize safety: swap to something

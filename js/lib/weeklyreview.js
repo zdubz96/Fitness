@@ -1,8 +1,11 @@
 import { sendMessageForJSON } from "../anthropic.js";
 import { buildCoachContext, contextToPromptText } from "./context.js";
 import { getLocal, save } from "../state.js";
+import { COACHING_PRINCIPLES } from "./principles.js";
 
-const SYSTEM_PROMPT = `You are an AI personal trainer writing this week's Coach Review for your
+const SYSTEM_PROMPT = `${COACHING_PRINCIPLES}
+
+You are an AI personal trainer writing this week's Coach Review for your
 client, using their full context (profile, goals, recovery indicators, last 14 days of Garmin
 data, recent logs). Report progress vs. their goals with concrete numbers where you can compute
 or estimate them, what went well, what to adjust, and next week's focus. Also report specifically
