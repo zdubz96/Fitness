@@ -108,3 +108,35 @@ export async function submitBaselineResults(results) {
 
   return nextProfile.baseline;
 }
+
+/**
+ * Re-run just the coach's ANALYSIS on the test results already recorded, using fresh context
+ * (e.g. after updating body weight, age/sex, or HR zones). Does not touch the exercise log —
+ * those sets were already logged when the baseline was first submitted.
+ */
+export async function reanalyzeBaseline() {
+  const profile = getLocal("trainer_profile") || {};
+  const existing = profile.baseline;
+  if (!existing || !existing.raw_results) {
+    throw new Error("No recorded results to re-analyze. Run the assessment first.");
+  }
+
+  const ctx = buildCoachContext();
+  const payload = existing.raw_results;
+  const baseline = await sendMessageForJSON(
+    DISTILL_PROMPT,
+    [{ role: "user", content: `Tests and results: ${JSON.stringify(payload)}\n\n${contextToPromptText(ctx)}` }],
+    { maxTokens: 3000 }
+  );
+
+  const units = profile.units || existing.units || "lb";
+  const nextBaseline = {
+    ...baseline,
+    units,
+    raw_results: payload,
+    assessed_at: existing.assessed_at, // preserve original test date
+    reanalyzed_at: new Date().toISOString(),
+  };
+  await save("trainer_profile", { ...profile, baseline: nextBaseline }, "chore: re-analyze fitness baseline");
+  return nextBaseline;
+}

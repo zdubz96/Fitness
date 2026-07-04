@@ -1,5 +1,5 @@
-import { getLocal } from "../state.js";
-import { generateBaselineAssessment, submitBaselineResults } from "../lib/assessment.js";
+import { getLocal, save } from "../state.js";
+import { generateBaselineAssessment, submitBaselineResults, reanalyzeBaseline } from "../lib/assessment.js";
 import { toast } from "../components/toast.js";
 import { unitLabel } from "../lib/units.js";
 
@@ -12,13 +12,15 @@ function escapeHtml(str) {
 export async function render(container) {
   const profile = getLocal("trainer_profile") || {};
 
-  if (profile.baseline) {
-    renderBaseline(container, profile.baseline);
+  // A pending assessment (fresh or a redo-in-progress) takes priority over an existing baseline,
+  // so you can resume/complete it; the old baseline stays saved until you submit the new one.
+  if (profile.pending_assessment) {
+    renderAssessment(container, profile.pending_assessment, Boolean(profile.baseline));
     return;
   }
 
-  if (profile.pending_assessment) {
-    renderAssessment(container, profile.pending_assessment);
+  if (profile.baseline) {
+    renderBaseline(container, profile.baseline);
     return;
   }
 
@@ -45,7 +47,7 @@ export async function render(container) {
   });
 }
 
-function renderAssessment(container, assessment) {
+function renderAssessment(container, assessment, isRedo = false) {
   container.innerHTML = `
     <h1>Baseline Diagnostic</h1>
     <div class="card"><p>${escapeHtml(assessment.intro)}</p></div>
@@ -55,8 +57,26 @@ function renderAssessment(container, assessment) {
     <div class="card stack">
       <p style="font-size:13px">Fill in results as you complete each test (skip any you couldn't do), then submit — your coach will distill your baseline.</p>
       <button id="submit-assessment">Submit results</button>
+      ${isRedo ? `<button id="cancel-redo" class="ghost">Cancel — keep my current baseline</button>` : ""}
     </div>
   `;
+
+  const cancelBtn = document.getElementById("cancel-redo");
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", async () => {
+      cancelBtn.disabled = true;
+      try {
+        const profile = getLocal("trainer_profile") || {};
+        const next = { ...profile };
+        delete next.pending_assessment;
+        await save("trainer_profile", next, "chore: cancel assessment redo");
+        renderBaseline(container, next.baseline);
+      } catch (err) {
+        toast(err.message, "error");
+        cancelBtn.disabled = false;
+      }
+    });
+  }
 
   document.getElementById("submit-assessment").addEventListener("click", async (e) => {
     const results = {};
@@ -121,14 +141,54 @@ function renderBaseline(container, baseline) {
       <h2>Strength</h2>
       ${baseline.strength.map((s) => `<div class="checklist-item">
         <div class="title">${escapeHtml(s.exercise)}</div>
-        <div class="meta">${s.estimated_1rm ? `est. 1RM ${s.estimated_1rm}` : ""}${s.working_weight ? ` · working weight ${s.working_weight}` : ""}${s.notes ? ` · ${escapeHtml(s.notes)}` : ""}</div>
+        <div class="meta">${s.estimated_1rm ? `est. 1RM ${s.estimated_1rm} ${baseline.units || unitLabel()}` : ""}${s.working_weight ? ` · working weight ${s.working_weight} ${baseline.units || unitLabel()}` : ""}${s.notes ? ` · ${escapeHtml(s.notes)}` : ""}</div>
       </div>`).join("")}
     </div>` : ""}
     ${baseline.cardio ? `<div class="card"><h2>Cardio</h2><p><strong>${escapeHtml(baseline.cardio.level)}</strong> — ${escapeHtml(baseline.cardio.details)}</p></div>` : ""}
     ${baseline.core ? `<div class="card"><h2>Core</h2><p>${escapeHtml(baseline.core)}</p></div>` : ""}
     ${baseline.mobility ? `<div class="card"><h2>Mobility</h2><p>${escapeHtml(baseline.mobility)}</p></div>` : ""}
+    <div class="card stack">
+      <button id="reanalyze">Re-run analysis</button>
+      <p style="font-size:12px;color:var(--text-dim);margin:0">Re-scores your recorded test results with your latest profile (body weight, age/sex, HR zones) — no need to redo the exercises.</p>
+      <button id="redo-full" class="secondary">Redo full assessment</button>
+      <p style="font-size:12px;color:var(--text-dim);margin:0">Design and perform a brand-new diagnostic session from scratch.</p>
+    </div>
     <div class="card">
       <a href="#/today">← Back to Today</a>
     </div>
   `;
+
+  const reanalyzeBtn = document.getElementById("reanalyze");
+  if (reanalyzeBtn) {
+    reanalyzeBtn.addEventListener("click", async () => {
+      reanalyzeBtn.disabled = true;
+      reanalyzeBtn.textContent = "Re-analyzing...";
+      try {
+        const updated = await reanalyzeBaseline();
+        toast("Baseline re-analyzed", "success");
+        renderBaseline(container, updated);
+      } catch (err) {
+        toast(err.message, "error");
+        reanalyzeBtn.disabled = false;
+        reanalyzeBtn.textContent = "Re-run analysis";
+      }
+    });
+  }
+
+  const redoBtn = document.getElementById("redo-full");
+  if (redoBtn) {
+    redoBtn.addEventListener("click", async () => {
+      if (!confirm("Design a new diagnostic session? Your current baseline stays until you submit new results.")) return;
+      redoBtn.disabled = true;
+      redoBtn.textContent = "Designing...";
+      try {
+        const assessment = await generateBaselineAssessment();
+        renderAssessment(container, assessment, true);
+      } catch (err) {
+        toast(err.message, "error");
+        redoBtn.disabled = false;
+        redoBtn.textContent = "Redo full assessment";
+      }
+    });
+  }
 }
