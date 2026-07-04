@@ -12,5 +12,33 @@
     "name": "Cardio",
     "training_load": null,
     "type": "indoor_cardio"
+  },
+  {
+    "aerobic_effect": null,
+    "anaerobic_effect": null,
+    "avg_hr": 125.0,
+    "calories": 133.0,
+    "date": "2026-07-03",
+    "distance_meters": 550.0,
+    "duration_seconds": 1267.0849609375,
+    "id": 23470807419,
+    "max_hr": 148.0,
+    "name": "Pool Swim",
+    "training_load": null,
+    "type": "lap_swimming"
+  },
+  {
+    "aerobic_effect": null,
+    "anaerobic_effect": null,
+    "avg_hr": 114.0,
+    "calories": 172.0,
+    "date": "2026-07-03",
+    "distance_meters": 0.0,
+    "duration_seconds": 2069.9130859375,
+    "id": 23470807240,
+    "max_hr": 148.0,
+    "name": "Strength",
+    "training_load": null,
+    "type": "strength_training"
   }
 ]
