@@ -33,7 +33,7 @@
   "cardio_history": "Self-assessed at or below average cardio fitness; has army background so some prior fitness base; observed max HR around 160-170 bpm during runs",
   "age": 30,
   "sex": "male",
-  "max_hr": 165,
+  "max_hr": 187,
   "onboarding_complete": true,
   "units": "kg",
   "height_cm": 162,
@@ -148,5 +148,32 @@
         "result": "550M, 125 BPM, effort 6"
       }
     ]
-  }
+  },
+  "zones": [
+    {
+      "name": "Zone 1 (Recovery)",
+      "low": 94,
+      "high": 112
+    },
+    {
+      "name": "Zone 2 (Easy/Base)",
+      "low": 112,
+      "high": 131
+    },
+    {
+      "name": "Zone 3 (Moderate)",
+      "low": 131,
+      "high": 150
+    },
+    {
+      "name": "Zone 4 (Threshold)",
+      "low": 150,
+      "high": 168
+    },
+    {
+      "name": "Zone 5 (VO2 Max)",
+      "low": 168,
+      "high": 187
+    }
+  ]
 }
