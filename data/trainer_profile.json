@@ -35,16 +35,57 @@
   "sex": "male",
   "max_hr": 165,
   "onboarding_complete": true,
-  "pending_assessment": {
-    "intro": "Welcome to your baseline diagnostic — this single session is all about taking an honest snapshot of where you are right now, so every future workout has real numbers to build from. We'll test a few key lifts to find your working weights, check your core endurance, assess hip mobility, and finish with a pool-based cardio effort that respects your dislike of running. Recovery looks green today, so you're in a great position to push honestly without holding back.",
-    "tests": [
+  "units": "kg",
+  "height_cm": 162,
+  "baseline": {
+    "strength": [
+      {
+        "exercise": "Barbell Back Squat",
+        "estimated_1rm": 87,
+        "working_weight": 72.5,
+        "notes": "80 kg × 4 reps → Epley 1RM ≈ 87 kg. Got 4 reps instead of 5, suggesting 80 kg was slightly above a true 5RM — conservative estimate warranted. Working weight set at ~82.5% of estimated 1RM for a solid 3×5 starting point. Good squat mobility observed (see mobility notes), so depth is not a limiter."
+      },
+      {
+        "exercise": "Barbell Conventional Deadlift",
+        "estimated_1rm": 103,
+        "working_weight": 85,
+        "notes": "90 kg × 5 reps → Epley 1RM ≈ 103 kg. Clean set of 5, so this is a reliable data point. Working weight set at ~82.5% for 3×5 programming. Deadlift is relatively stronger than squat — typical pattern, but worth monitoring that the gap doesn't widen excessively as loads increase."
+      },
+      {
+        "exercise": "Barbell Bench Press",
+        "estimated_1rm": 67,
+        "working_weight": 55,
+        "notes": "60 kg × 5 reps → Epley 1RM ≈ 67 kg. Protocol specified no push to failure given rotator cuff sensitivity, so actual capacity may be marginally higher — but we keep the conservative estimate as the working baseline. Working weight at ~82% of 1RM. Elbows-in technique cue is mandatory; any anterior shoulder discomfort at or below this weight is a hard stop signal."
+      },
+      {
+        "exercise": "Push-Ups",
+        "estimated_1rm": null,
+        "working_weight": null,
+        "notes": "40 reps to failure after bench press is an excellent result — well above average for a 30-year-old male. Indicates solid relative upper-body pushing endurance and body-weight-to-strength ratio. No 1RM applicable. Use as a benchmark for muscular endurance; can program weighted push-up variations as accessory work."
+      }
+    ],
+    "cardio": {
+      "level": "Moderate — approaching average for age, with a solid base to build from",
+      "details": "Swam 550 m in 20 minutes at an average HR of 125 bpm (RPE 6/10). With a max HR of ~165 bpm, 125 bpm represents approximately 76% HRmax — meaningfully above the intended 60–70% aerobic target zone for this test, which suggests current aerobic economy is moderate rather than strong. At a true conversational effort he would likely cover less distance. Resting HR of ~51 bpm and HRV around 56 ms indicate reasonable autonomic health and a decent underlying aerobic base, likely from army background. Garmin VO2 max data not available in the record, but extrapolating from swim performance and HR response, estimated VO2 max is in the 40–44 ml/kg/min range — average to slightly below average for a 30-year-old male. Cardio goals (5k, 1.5-mile run, above-average VO2 max) are ambitious but achievable with consistent structured work."
+    },
+    "core": "Above average endurance for a 90-second forearm plank. 90 seconds is a solid result — above the general population median (~60 s) and in the 'good' range for a 30-year-old male. Core stability appears functional and adequate to support barbell work at current loads. Not yet exceptional; progressing toward 2+ minutes and introducing anti-rotation and lateral stability work will be valuable as lifting loads increase.",
+    "mobility": "Hip mobility is a clear strength. Full-depth bodyweight squat with flat heels, no discomfort, and no reported compensation. This is an unrestricted lower-body movement pattern — no ankle, hip, or thoracic mobility limitations observed in the squat plane. Rotator cuff sensitivity (pre-existing) limits overhead shoulder loading; internal/external rotation range and impingement thresholds have not been formally tested here but must be respected in programming. No wrist discomfort noted during push-ups. Overall: lower-body mobility is good; shoulder complex is the one area requiring ongoing monitoring and conservative loading.",
+    "summary": "You're coming in with a genuinely solid foundation — your squat and deadlift numbers are respectable for someone without structured programming, your push-up endurance is well above average, and your hip mobility is a real asset that many lifters don't have. Cardio is the honest growth area: your swim HR was higher than the target zone for a steady-state effort, putting current aerobic fitness at moderate, but your resting HR and HRV suggest your body is ready to adapt quickly. The rotator cuff sensitivity is the one constraint that needs consistent respect — it won't stop you building an impressive physique, it just shapes the route. You have a clear, measurable baseline now, and every number here will look different in 12 weeks.",
+    "programming_notes": "PRIMARY GOALS: hypertrophy and strength via progressive overload; secondary goal is building aerobic base toward 5k and sub-12-min 1.5-mile run (notes: he dislikes running so lean on pool cardio initially and introduce run-walk protocols gradually). STRENGTH PROGRAMMING: Start on a 3-day upper/lower or push/pull/legs split given 3–4 days/week. Begin squat at 72.5 kg 3×5, deadlift at 85 kg 3×5, bench at 55 kg 3×5 — add 2.5 kg to upper body and 5 kg to lower body each session while form holds (linear progression phase). Bench press: strict shoulder-safe technique always — no wide flare, no heavy overhead pressing (no barbell OHP, no heavy DB overhead until rotator cuff is assessed and conditioned). Replace OHP with landmine press, cable lateral raises, or machine shoulder press at controlled angles. Include face pulls or band pull-aparts every session as rotator cuff prehab. HYPERTROPHY: After main compound lifts, add 2–3 accessory exercises in 3×8–12 rep range (e.g., Romanian deadlift, dumbbell row, incline DB press, leg press, cable row, dips if shoulder-safe). Push-up variations (archer, weighted vest) can supplement chest volume. CORE: Progress plank toward 2 min; introduce Pallof press, ab wheel rollouts, and dead bugs for anti-rotation and spinal stability. CARDIO: 1–2 pool sessions per week at true Zone 2 (HR 95–110 bpm given his max HR of 165 — he needs to slow down relative to today's test pace). Every 4 weeks, retest 20-min swim distance to track aerobic progress. Introduce run-walk intervals only after 6–8 weeks of consistent training and once he has expressed willingness — start with 1 min run / 2 min walk intervals. UNITS: all weights in kg. TRACKING: Retest squat/deadlift/bench 5RM at weeks 8 and 16. Retest plank and swim at week 8.",
+    "units": "kg",
+    "assessed_at": "2026-07-04T17:26:42.890Z",
+    "raw_results": [
       {
         "id": "barbell_back_squat_5rm",
         "name": "Barbell Back Squat — Heavy Set of 5",
         "category": "strength",
         "protocol": "Warm up with 5 minutes of light movement (leg swings, bodyweight squats). Then perform: 1×8 at an empty bar, rest 90s; 1×5 at ~50% of your expected working weight, rest 90s; 1×3 at ~70%, rest 2min; 1×1 at ~85%, rest 2min. Then attempt a challenging but clean set of 5 reps — this should be a weight where rep 5 is genuinely hard but form stays solid. Bar stays on mid-to-upper traps (low bar also fine), no overhead load concern here. Rest fully before each build-up set. Stop if form breaks down.",
         "record": "weight_reps",
-        "record_label": "Weight (kg or lb) × reps completed in your best set of 5"
+        "record_label": "Weight (kg or lb) × reps completed in your best set of 5",
+        "result": {
+          "weight": 80,
+          "reps": 4
+        }
       },
       {
         "id": "barbell_deadlift_5rm",
@@ -52,7 +93,11 @@
         "category": "strength",
         "protocol": "After squats, rest 5 minutes. Warm up the deadlift with: 1×5 at 50% of your expected working weight, rest 90s; 1×3 at ~70%, rest 2min; 1×1 at ~85%, rest 2min. Then do your challenging set of 5. Keep a neutral spine throughout; this is a hinge pattern, not a squat. No shoulder vulnerability here — focus on hip drive and lat engagement. Record the heaviest set of 5 you complete with good form.",
         "record": "weight_reps",
-        "record_label": "Weight (kg or lb) × reps completed in your best set of 5"
+        "record_label": "Weight (kg or lb) × reps completed in your best set of 5",
+        "result": {
+          "weight": 90,
+          "reps": 5
+        }
       },
       {
         "id": "barbell_bench_press_5rm",
@@ -60,7 +105,11 @@
         "category": "strength",
         "protocol": "Given rotator cuff sensitivity, use a moderate grip width (just outside shoulder width), keep elbows at roughly 45–60° from torso rather than flared wide, and do NOT push to true failure. Warm up with: 1×8 empty bar, rest 90s; 1×5 at ~50%, rest 90s; 1×3 at ~70%, rest 2min; 1×1 at ~85%, rest 2min. Then perform a challenging set of 5 with good control. Stop at any shoulder discomfort — note if that happens. Shoulder blades retracted and depressed throughout.",
         "record": "weight_reps",
-        "record_label": "Weight (kg or lb) × reps completed in your best set of 5"
+        "record_label": "Weight (kg or lb) × reps completed in your best set of 5",
+        "result": {
+          "weight": 60,
+          "reps": 5
+        }
       },
       {
         "id": "max_pushups",
@@ -68,7 +117,8 @@
         "category": "strength",
         "protocol": "After at least 3 minutes of rest following bench press. No warm-up set needed — bench press has already primed you. Get into a standard push-up position: hands just outside shoulders, body in a straight line from head to heel. Perform as many reps as possible without stopping, maintaining full range (chest within 2–3 cm of floor, elbows fully extended at top). Stop when you can no longer maintain form. Note: use a neutral wrist position; if wrist discomfort arises, stop early and note it.",
         "record": "reps",
-        "record_label": "Total reps completed with good form"
+        "record_label": "Total reps completed with good form",
+        "result": 40
       },
       {
         "id": "plank_hold",
@@ -76,7 +126,8 @@
         "category": "core",
         "protocol": "Rest 3 minutes after push-ups. Get into a forearm plank: elbows directly under shoulders, forearms flat, body in a straight line from head to heel. Hold as long as possible while maintaining a truly neutral spine — no sagging hips, no pike. Stop the timer the moment your hips drop more than ~2 cm or you need to adjust position. Have someone time you, or use a phone propped nearby. No specific warm-up needed.",
         "record": "time_seconds",
-        "record_label": "Total hold time in seconds"
+        "record_label": "Total hold time in seconds",
+        "result": 90
       },
       {
         "id": "deep_squat_hold",
@@ -84,7 +135,8 @@
         "category": "mobility",
         "protocol": "Stand with feet shoulder-width apart, toes angled out 15–30°. Lower into the deepest squat you can comfortably hold, aiming to get your hips below your knees. Hold for up to 60 seconds. Note: can you hold the bottom position with your heels flat on the floor? Do your knees track over your toes? Is there any rounding in the lower back or discomfort in hips, knees, or ankles? No hands on the floor — arms extended in front for balance if needed. This is an observation test, not a pass/fail.",
         "record": "note",
-        "record_label": "Describe: heel contact (yes/no), depth achieved, any discomfort or compensation noted"
+        "record_label": "Describe: heel contact (yes/no), depth achieved, any discomfort or compensation noted",
+        "result": "Yes heel contact, depth achieved, no discomfort"
       },
       {
         "id": "pool_steady_state_20min",
@@ -92,12 +144,9 @@
         "category": "cardio",
         "protocol": "Head to the pool last. Swim any stroke you're comfortable with (freestyle recommended) at a pace you could sustain for the full 20 minutes — conversational effort, roughly 60–70% of max HR (target ~100–115 bpm if you can monitor). Warm up with 2 easy lengths. Then start a 20-minute continuous effort, counting total lengths completed. If you wear your Garmin in the water, record average HR. If not, note your perceived exertion (scale 1–10) at the midpoint and end. Cool down with 2 easy lengths after the timer.",
         "record": "note",
-        "record_label": "Total lengths in 20 min, average HR if available, and perceived effort (1–10) at midpoint and finish"
+        "record_label": "Total lengths in 20 min, average HR if available, and perceived effort (1–10) at midpoint and finish",
+        "result": "550M, 125 BPM, effort 6"
       }
-    ],
-    "created_at": "2026-07-02T20:23:51.706Z",
-    "results": {}
-  },
-  "units": "kg",
-  "height_cm": 162
+    ]
+  }
 }
