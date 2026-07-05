@@ -133,7 +133,13 @@ export async function render(container) {
 
     return `
       <div class="card">
-        <div class="row"><h2 style="margin:0">This week</h2>${hasMissedDays() ? `<button id="readjust" class="ghost">Readjust week</button>` : ""}</div>
+        <div class="row">
+          <h2 style="margin:0">This week</h2>
+          <div style="display:flex;gap:4px">
+            ${hasMissedDays() ? `<button id="readjust" class="ghost">Readjust</button>` : ""}
+            <button id="regen-program" class="ghost">Regenerate</button>
+          </div>
+        </div>
         <div style="display:flex;gap:6px;overflow-x:auto;padding:8px 2px 4px">${strip}</div>
       </div>
       <div class="card" id="day-detail">
@@ -235,6 +241,26 @@ export async function render(container) {
         paint();
       });
     });
+
+    const regenBtn = document.getElementById("regen-program");
+    if (regenBtn) {
+      regenBtn.addEventListener("click", async () => {
+        if (!confirm("Generate a fresh 7-day program from today? This replaces your current week (completed days will be overwritten).")) return;
+        regenBtn.disabled = true;
+        regenBtn.textContent = "Rebuilding...";
+        try {
+          await generateWeeklyProgram();
+          workouts = getLocal("workouts");
+          selectedDate = todayStr();
+          toast("New program ready", "success");
+          paint();
+        } catch (e) {
+          toast(e.message, "error");
+          regenBtn.disabled = false;
+          regenBtn.textContent = "Regenerate";
+        }
+      });
+    }
 
     const readjustBtn = document.getElementById("readjust");
     if (readjustBtn) {
