@@ -22,7 +22,11 @@ const DAY_SCHEMA = `{
   "day_offset": number,      // 0 = today, 1 = tomorrow, ... 6
   "focus": string,           // short, e.g. "Lower strength", "Zone 2 cardio", "Rest"
   "is_rest_day": boolean,
-  "duration_min": number,    // estimated total minutes (0 for rest days)
+  "duration_min": number,    // estimated TOTAL minutes incl. warm-up + cool-down (0 for rest days)
+  "warmup": string,          // specific warm-up for this session ("" for rest days)
+  "warmup_min": number,      // minutes (0 for rest days)
+  "cooldown": string,        // specific cool-down for this session ("" for rest days)
+  "cooldown_min": number,    // minutes (0 for rest days)
   "exercises": [             // empty for rest days; at most 6 for training days
     { "name": string, "sets": number, "reps": string, "rest_seconds": number, "rpe_target": number, "notes": string }
   ],
@@ -39,10 +43,13 @@ starting loads to it), recovery indicators, recent Garmin data and logs.
 Rules:
 - Return EXACTLY 7 day objects, day_offset 0 through 6, in order.
 - Honor their schedule: include rest days so training days match how many days/week they can train.
+- Every training day MUST include a specific warm-up and cool-down with durations; the total
+  (warm-up + work + cool-down) must fit ~60 minutes.
 - Balance strength with structured cardio when they have a cardiovascular goal (Zone 2 base volume
   plus some interval work — the two levers for VO2 max), and avoid burying everything in the
   moderate "gray zone".
 - Respect injuries strictly. Apply progressive overload vs. their recent logged working weights.
+  For any accessory the client has logged before, prescribe based on their last logged weight.
 - If recovery is flagged yellow/red, reduce volume/intensity and/or add rest.
 - Keep every "notes" field to one short phrase. Be concise so the whole plan fits.
 
@@ -52,11 +59,18 @@ Respond with ONLY a JSON object (no markdown fences, no commentary):
 const READJUST_PROMPT = `${COACHING_PRINCIPLES}
 
 You are an AI personal trainer REVISING the remainder of a client's current
-7-day program because they missed one or more sessions (or need it reworked). You are given the
-full week with each day's status (completed / missed / planned / rest) and the exact dates that
-still need a plan. Keep already-completed days as they are (do not resend them). Redistribute the
-missed work sensibly across the remaining days without overloading any single day or compromising
-recovery — it's fine to drop lower-priority work rather than cram everything in.
+7-day program because they missed one or more sessions, did significant UNPLANNED activity (e.g. a
+long hike logged via Garmin), or otherwise need it reworked. You are given the full week with each
+day's status (completed / missed / planned / rest), their recent Garmin activities (which include
+unplanned efforts), and the exact dates that still need a plan. Keep already-completed days as they
+are (do not resend them).
+
+Reconcile the plan with what ACTUALLY happened: if an unplanned effort effectively replaced a
+planned session (e.g. a hard hike on a strength day), treat that planned work as displaced and slot
+it into a later, lighter day rather than piling hard sessions on top of accumulated fatigue.
+Redistribute missed work sensibly without overloading any single day or compromising recovery —
+it's fine to drop lower-priority work rather than cram everything in. Every training day you return
+must still include a warm-up and cool-down and fit ~60 minutes total.
 
 Return plans ONLY for the remaining dates you're given, in the same order. Use the same day schema
 ${DAY_SCHEMA}
@@ -90,6 +104,10 @@ function toWorkoutEntry(programId, startDate, day) {
     focus: day.focus || (day.is_rest_day ? "Rest" : "Training"),
     is_rest_day: !!day.is_rest_day,
     duration_min: day.duration_min || null,
+    warmup: day.warmup || "",
+    warmup_min: day.warmup_min || null,
+    cooldown: day.cooldown || "",
+    cooldown_min: day.cooldown_min || null,
     exercises: (day.exercises || []).map((e) => ({ ...e, completed_sets: [] })),
     rationale: day.rationale || "",
     status: day.is_rest_day ? "rest" : "planned",

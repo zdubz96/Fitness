@@ -22,6 +22,26 @@ function windowValues(rows, field, fromDaysAgo, toDaysAgo) {
 }
 
 /**
+ * Effective training load for an activity. Uses Garmin's own training_load when present; otherwise
+ * estimates from duration and average HR so unplanned efforts (e.g. hikes) that Garmin didn't score
+ * still count toward weekly load and the acute:chronic ratio.
+ */
+export function effectiveLoad(a) {
+  if (typeof a.training_load === "number") return a.training_load;
+  if (typeof a.duration_seconds !== "number") return null;
+  const minutes = a.duration_seconds / 60;
+  const hr = a.avg_hr;
+  let factor = 0.8; // unknown intensity default
+  if (typeof hr === "number") {
+    if (hr >= 150) factor = 2.0;
+    else if (hr >= 130) factor = 1.3;
+    else if (hr >= 110) factor = 0.9;
+    else factor = 0.6;
+  }
+  return Math.round(minutes * factor);
+}
+
+/**
  * @param {object} data
  * @param {Array} data.wellness - garmin_wellness.json rows {date, resting_hr, sleep_seconds}
  * @param {Array} data.health - garmin_health.json rows {date, hrv_avg_ms}
@@ -30,6 +50,9 @@ function windowValues(rows, field, fromDaysAgo, toDaysAgo) {
 export function computeRecoveryStatus({ wellness = [], health = [], activities = [] }) {
   const reasons = [];
   let flagCount = 0;
+
+  // Include unplanned/unscored activities in load by attaching an effective load to each.
+  const loadedActivities = activities.map((a) => ({ ...a, _load: effectiveLoad(a) }));
 
   // --- Resting HR: 7-day avg vs prior-30-day baseline (days 8-37 back) ---
   const rhr7 = avg(windowValues(wellness, "resting_hr", 0, 7));
@@ -81,8 +104,9 @@ export function computeRecoveryStatus({ wellness = [], health = [], activities =
   if (hrvFlag) flagCount++;
 
   // --- Acute:chronic training load ratio (7-day vs 28-day) ---
-  const acute = avg(windowValues(activities, "training_load", 0, 7));
-  const chronic = avg(windowValues(activities, "training_load", 0, 28));
+  // Uses effective load so unplanned activities (hikes etc.) are included.
+  const acute = avg(windowValues(loadedActivities, "_load", 0, 7));
+  const chronic = avg(windowValues(loadedActivities, "_load", 0, 28));
   let loadRatio = null;
   let loadFlag = false;
   let loadFlagLevel = null;

@@ -68,7 +68,8 @@ level: ${ctx.recovery.level}
 reasons: ${ctx.recovery.reasons.join(" | ")}
 metrics: ${JSON.stringify(ctx.recovery.metrics)}
 
-LAST 14 DAYS OF GARMIN ACTIVITIES:
+LAST 14 DAYS OF GARMIN ACTIVITIES (includes BOTH planned sessions and any unplanned efforts like
+hikes — treat every one as real training stress and reconcile the plan against what actually happened):
 ${JSON.stringify(ctx.last14Activities)}
 
 LAST 14 DAYS OF WELLNESS (sleep, resting HR, steps):

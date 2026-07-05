@@ -1,7 +1,8 @@
 import { getLocal, refresh, save } from "../state.js";
-import { computeRecoveryStatus } from "../lib/recovery.js";
+import { computeRecoveryStatus, effectiveLoad } from "../lib/recovery.js";
 import { showRestTimer } from "../components/timer.js";
 import { toast } from "../components/toast.js";
+import { unitLabel, displayWeight } from "../lib/units.js";
 import { requestExerciseAdjustment, applyAdjustmentToTodaysWorkout } from "../lib/adjust.js";
 import { needsWeeklyReview, generateWeeklyReview } from "../lib/weeklyreview.js";
 import {
@@ -49,7 +50,7 @@ export async function render(container) {
     const recovery = computeRecoveryStatus({ wellness, health, activities });
     const today = todayStr();
     const todaysWellness = wellness.find((w) => w.date === today) || {};
-    const recent7Load = activities.filter((a) => a.training_load).slice(-7).reduce((s, a) => s + (a.training_load || 0), 0);
+    const recent7Load = activities.slice(-7).reduce((s, a) => s + (effectiveLoad(a) || 0), 0);
 
     const showReviewBanner = needsWeeklyReview(reviews);
     const profile = getLocal("trainer_profile") || {};
@@ -136,7 +137,7 @@ export async function render(container) {
         <div class="row">
           <h2 style="margin:0">This week</h2>
           <div style="display:flex;gap:4px">
-            ${hasMissedDays() ? `<button id="readjust" class="ghost">Readjust</button>` : ""}
+            <button id="readjust" class="ghost">Readjust</button>
             <button id="regen-program" class="ghost">Regenerate</button>
           </div>
         </div>
@@ -162,6 +163,15 @@ export async function render(container) {
     }
 
     const rationale = day.rationale ? `<p style="font-style:italic;margin-top:8px">"${escapeHtml(day.rationale)}"</p>` : "";
+    const units = unitLabel();
+
+    const warmupHtml = day.warmup
+      ? `<div class="checklist-item" style="background:var(--bg-elev)"><div class="title">🔥 Warm-up${day.warmup_min ? ` · ${day.warmup_min}m` : ""}</div><div class="meta">${escapeHtml(day.warmup)}</div></div>`
+      : "";
+    const cooldownHtml = day.cooldown
+      ? `<div class="checklist-item" style="background:var(--bg-elev)"><div class="title">🧊 Cool-down${day.cooldown_min ? ` · ${day.cooldown_min}m` : ""}</div><div class="meta">${escapeHtml(day.cooldown)}</div></div>`
+      : "";
+
     const exercises = day.exercises
       .map((ex, exIdx) => {
         const completed = ex.completed_sets || [];
@@ -175,10 +185,25 @@ export async function render(container) {
           })
           .join("");
         const allDone = completed.length && completed.filter(Boolean).length === (ex.sets || 1);
+
+        // Weight logging: skip for holds/time/distance-based movements. Prefill with what's already
+        // logged this session; otherwise hint with last time's weight (or "baseline" if brand new).
+        const weighted = !/hold|min|sec|km|mile/i.test(String(ex.reps));
+        const last = lastLoggedWeight(ex.name);
+        const prefill = ex.logged_weight != null ? ex.logged_weight : "";
+        const hint = last ? `last: ${displayWeight(last.value, last.unit)} ${units}` : "baseline — log what you use";
+        const weightHtml = weighted
+          ? `<div style="margin-top:6px;display:flex;align-items:center;gap:8px">
+               <label style="margin:0;font-size:12px;color:var(--text-dim)">Weight (${units})</label>
+               <input type="number" inputmode="decimal" data-weight-ex="${exIdx}" value="${prefill}" placeholder="${hint}" style="max-width:150px" />
+             </div>`
+          : "";
+
         return `<div class="checklist-item ${allDone ? "done" : ""}" data-exercise-idx="${exIdx}" data-exercise-name="${escapeHtml(ex.name)}">
           <div class="title">${escapeHtml(ex.name)}</div>
           <div class="meta">${ex.sets}x${escapeHtml(String(ex.reps))} · rest ${ex.rest_seconds}s${ex.notes ? ` · ${escapeHtml(ex.notes)}` : ""}</div>
           <div style="margin-top:6px">${setsHtml}</div>
+          ${weightHtml}
           ${isToday ? `<div style="margin-top:4px;font-size:11px;color:var(--text-dim)">Long-press to talk to coach about this exercise</div>` : ""}
         </div>`;
       })
@@ -190,7 +215,20 @@ export async function render(container) {
     </div>
     ${day.feedback ? `<p style="margin-top:10px;font-size:13px">Feedback: <strong>${escapeHtml(day.feedback.difficulty)}</strong>${day.feedback.note ? ` — ${escapeHtml(day.feedback.note)}` : ""}</p>` : ""}`;
 
-    return `${header}${rationale}${exercises}${actions}`;
+    return `${header}${rationale}${warmupHtml}${exercises}${cooldownHtml}${actions}`;
+  }
+
+  function lastLoggedWeight(name) {
+    const log = getLocal("exercise_log");
+    for (let i = log.length - 1; i >= 0; i--) {
+      if (log[i].exercise !== name) continue;
+      const withW = (log[i].sets || []).filter((s) => s.weight);
+      if (withW.length) {
+        const last = withW[withW.length - 1];
+        return { value: last.weight, unit: last.weight_unit };
+      }
+    }
+    return null;
   }
 
   // ---- wiring ----
@@ -265,7 +303,7 @@ export async function render(container) {
     const readjustBtn = document.getElementById("readjust");
     if (readjustBtn) {
       readjustBtn.addEventListener("click", async () => {
-        if (!confirm("Ask the coach to rework the rest of your week around what you missed?")) return;
+        if (!confirm("Ask the coach to rework the rest of your week around what actually happened (missed sessions and any unplanned activity like hikes)?")) return;
         readjustBtn.disabled = true;
         readjustBtn.textContent = "Reworking...";
         try {
@@ -299,6 +337,23 @@ export async function render(container) {
   }
 
   function wireWorkout(workout) {
+    container.querySelectorAll("input[data-weight-ex]").forEach((inp) => {
+      inp.addEventListener("change", async () => {
+        const exIdx = Number(inp.dataset.weightEx);
+        workout.exercises[exIdx].logged_weight = Number(inp.value) || null;
+        workout.exercises[exIdx].logged_weight_unit = unitLabel();
+        const all = getLocal("workouts");
+        const idx = all.findIndex((w) => w.date === workout.date);
+        if (idx >= 0) all[idx] = workout;
+        try {
+          await save("workouts", all, "chore: log exercise weight");
+          workouts = all;
+        } catch (e) {
+          toast(e.message, "error");
+        }
+      });
+    });
+
     container.querySelectorAll('input[type="checkbox"][data-ex]').forEach((box) => {
       box.addEventListener("change", async (e) => {
         const exIdx = Number(e.target.dataset.ex);
@@ -429,7 +484,9 @@ export async function render(container) {
           id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           date: workout.date,
           exercise: ex.name,
-          sets: (ex.completed_sets || []).map((done) => (done ? { reps: ex.reps, weight: null } : null)).filter(Boolean),
+          sets: (ex.completed_sets || [])
+            .map((done) => (done ? { reps: ex.reps, weight: ex.logged_weight ?? null, weight_unit: ex.logged_weight_unit || unitLabel() } : null))
+            .filter(Boolean),
           note: null,
           source: "planned",
           feedback: workout.feedback,
