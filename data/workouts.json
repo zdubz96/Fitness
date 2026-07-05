@@ -1,7 +1,7 @@
 [
   {
     "date": "2026-07-04",
-    "program_id": "prog-1783233007451",
+    "program_id": "prog-1783233095350",
     "day_offset": 0,
     "focus": "Rest / active recovery",
     "is_rest_day": true,
@@ -11,29 +11,29 @@
     "cooldown": "",
     "cooldown_min": null,
     "exercises": [],
-    "rationale": "Assessment and first strength session completed today — full rest to absorb that stimulus before week 1 begins.",
+    "rationale": "Assessment and first strength session already completed today — full rest to absorb the stimulus.",
     "status": "rest",
-    "generated_at": "2026-07-05T06:30:07.451Z"
+    "generated_at": "2026-07-05T06:31:35.350Z"
   },
   {
     "date": "2026-07-05",
-    "program_id": "prog-1783233007451",
+    "program_id": "prog-1783233095350",
     "day_offset": 1,
     "focus": "Lower body strength",
     "is_rest_day": false,
     "duration_min": 60,
-    "warmup": "5 min brisk walk or bike; leg swings (front/back, lateral) 10 reps each; hip circles 10 each; bodyweight squat 2×10; squat ramp sets: bar×8, 40 kg×5, 55 kg×3, 65 kg×2",
+    "warmup": "5 min: leg swings (front/back and lateral, 10 each), hip circles, bodyweight squats × 10; then squat ramp: empty bar × 8, 40 kg × 5, 55 kg × 3, 65 kg × 1",
     "warmup_min": 12,
-    "cooldown": "5 min easy walk; seated hamstring stretch 30s each; kneeling hip flexor stretch 30s each; pigeon pose or figure-4 glute stretch 30s each side",
-    "cooldown_min": 6,
+    "cooldown": "5 min: standing quad stretch, kneeling hip flexor stretch, seated hamstring stretch, slow diaphragmatic breathing",
+    "cooldown_min": 5,
     "exercises": [
       {
         "name": "Barbell Back Squat",
         "sets": 3,
         "reps": "5",
         "rest_seconds": 180,
-        "rpe_target": 7,
-        "notes": "72.5 kg — first working weight per baseline",
+        "rpe_target": 8,
+        "notes": "Start linear progression at 72.5 kg",
         "completed_sets": []
       },
       {
@@ -42,7 +42,7 @@
         "reps": "8",
         "rest_seconds": 120,
         "rpe_target": 7,
-        "notes": "Start at 60 kg, hip hinge focus, no spinal rounding",
+        "notes": "Start at 60 kg; hinge focus",
         "completed_sets": []
       },
       {
@@ -51,33 +51,42 @@
         "reps": "10",
         "rest_seconds": 90,
         "rpe_target": 7,
-        "notes": "Moderate load, full range, controlled descent",
+        "notes": "Moderate load, controlled tempo",
         "completed_sets": []
       },
       {
-        "name": "Forearm Plank",
+        "name": "Leg Curl (machine)",
         "sets": 3,
-        "reps": "65s hold",
-        "rest_seconds": 60,
+        "reps": "10",
+        "rest_seconds": 90,
         "rpe_target": 7,
-        "notes": "Slight progression from 60s baseline — stop if hips sag",
+        "notes": "Full ROM, no jerking",
+        "completed_sets": []
+      },
+      {
+        "name": "Plank (forearm)",
+        "sets": 3,
+        "reps": "75s",
+        "rest_seconds": 60,
+        "rpe_target": 6,
+        "notes": "Progress from 90s baseline gradually",
         "completed_sets": []
       }
     ],
-    "rationale": "First structured lower-body session at baseline working weights — squat leads, RDL covers posterior chain without axial deadlift load.",
+    "rationale": "First structured lower session of the program — sets the baseline for linear squat progression and builds posterior-chain volume with safe hip-hinge variations.",
     "status": "planned",
-    "generated_at": "2026-07-05T06:30:07.451Z"
+    "generated_at": "2026-07-05T06:31:35.350Z"
   },
   {
     "date": "2026-07-06",
-    "program_id": "prog-1783233007451",
+    "program_id": "prog-1783233095350",
     "day_offset": 2,
     "focus": "Upper body strength",
     "is_rest_day": false,
     "duration_min": 60,
-    "warmup": "5 min easy bike or row; arm circles 15 each direction; band pull-aparts 2×15; scapular wall slides 2×10; bench ramp sets: bar×10, 35 kg×5, 47.5 kg×3",
+    "warmup": "5 min: arm circles, band pull-aparts × 15, shoulder CARs, light dumbbell lateral raise × 12 each side; then bench ramp: empty bar × 8, 35 kg × 5, 47.5 kg × 3",
     "warmup_min": 10,
-    "cooldown": "5 min easy walk; doorway chest stretch 30s; cross-body shoulder stretch 30s each; lat stretch (hanging or standing) 30s each side",
+    "cooldown": "5 min: doorway pec stretch (gentle), cross-body shoulder stretch, thoracic extension over bench edge, slow breathing",
     "cooldown_min": 5,
     "exercises": [
       {
@@ -86,7 +95,7 @@
         "reps": "15",
         "rest_seconds": 60,
         "rpe_target": 6,
-        "notes": "Shoulder prehab — non-negotiable; light load, full retraction",
+        "notes": "Shoulder prehab — non-negotiable opener",
         "completed_sets": []
       },
       {
@@ -94,17 +103,17 @@
         "sets": 3,
         "reps": "5",
         "rest_seconds": 180,
-        "rpe_target": 7,
-        "notes": "55 kg — elbows 45–60° from torso, stop at any shoulder pain",
+        "rpe_target": 8,
+        "notes": "Start at 55 kg; elbows 45–60° from torso",
         "completed_sets": []
       },
       {
-        "name": "Dumbbell Row",
+        "name": "Dumbbell Row (single-arm)",
         "sets": 3,
-        "reps": "8",
+        "reps": "10",
         "rest_seconds": 90,
         "rpe_target": 7,
-        "notes": "Start at 20 kg each side; full range, controlled",
+        "notes": "Brace on bench; full retraction at top",
         "completed_sets": []
       },
       {
@@ -113,7 +122,7 @@
         "reps": "10",
         "rest_seconds": 90,
         "rpe_target": 7,
-        "notes": "Shoulder-width or slightly wider grip, pull to upper chest",
+        "notes": "Neutral or shoulder-width grip; controlled",
         "completed_sets": []
       },
       {
@@ -122,43 +131,43 @@
         "reps": "12",
         "rest_seconds": 60,
         "rpe_target": 6,
-        "notes": "Light load, cable preferred over dumbbells for shoulder safety",
+        "notes": "Light load; avoid impingement at top",
         "completed_sets": []
       }
     ],
-    "rationale": "First upper-body session at baseline bench weight with mandatory shoulder prehab and balanced pull volume to protect the rotator cuff.",
+    "rationale": "First structured upper session — establishes bench baseline and hits vertical pull, horizontal pull, and shoulder isolation within shoulder constraints.",
     "status": "planned",
-    "generated_at": "2026-07-05T06:30:07.451Z"
+    "generated_at": "2026-07-05T06:31:35.350Z"
   },
   {
     "date": "2026-07-07",
-    "program_id": "prog-1783233007451",
+    "program_id": "prog-1783233095350",
     "day_offset": 3,
     "focus": "Zone 2 pool swim",
     "is_rest_day": false,
-    "duration_min": 45,
-    "warmup": "2 easy lengths (50 m) of slow freestyle to loosen up; 30s shoulder rolls and neck circles on pool deck before entering",
-    "warmup_min": 5,
-    "cooldown": "2 easy lengths backstroke or gentle float; calf stretch on pool steps 30s each; standing hip flexor stretch 30s each side",
-    "cooldown_min": 5,
+    "duration_min": 40,
+    "warmup": "2 easy lengths (any stroke) at very relaxed pace — HR should stay below 110 bpm",
+    "warmup_min": 4,
+    "cooldown": "2 easy lengths easy backstroke or float, then poolside calf stretch and hip flexor stretch",
+    "cooldown_min": 4,
     "exercises": [
       {
         "name": "Continuous Freestyle Swim",
         "sets": 1,
-        "reps": "25 min",
+        "reps": "22 min",
         "rest_seconds": 0,
         "rpe_target": 6,
-        "notes": "Target avg HR 112–131 bpm; aim to match or exceed 550 m baseline",
+        "notes": "Target avg HR 112–131 bpm; match or beat 550 m baseline",
         "completed_sets": []
       }
     ],
-    "rationale": "Zone 2 aerobic base session — slightly longer than the 20-min baseline to begin building volume toward the VO2 max goal.",
+    "rationale": "Zone 2 aerobic base session — builds VO2 max foundation using pool (preferred over running) while keeping intensity steady and within target band.",
     "status": "planned",
-    "generated_at": "2026-07-05T06:30:07.451Z"
+    "generated_at": "2026-07-05T06:31:35.350Z"
   },
   {
     "date": "2026-07-08",
-    "program_id": "prog-1783233007451",
+    "program_id": "prog-1783233095350",
     "day_offset": 4,
     "focus": "Rest",
     "is_rest_day": true,
@@ -168,20 +177,20 @@
     "cooldown": "",
     "cooldown_min": null,
     "exercises": [],
-    "rationale": "Mid-week rest between the swim and the next strength block to allow recovery.",
+    "rationale": "Midweek rest after three consecutive training days to allow recovery before the second strength block.",
     "status": "rest",
-    "generated_at": "2026-07-05T06:30:07.451Z"
+    "generated_at": "2026-07-05T06:31:35.350Z"
   },
   {
     "date": "2026-07-09",
-    "program_id": "prog-1783233007451",
+    "program_id": "prog-1783233095350",
     "day_offset": 5,
-    "focus": "Full body strength",
+    "focus": "Lower body strength",
     "is_rest_day": false,
     "duration_min": 60,
-    "warmup": "5 min bike or walk; leg swings 10 each; hip circles 10 each; band pull-aparts 1×15; deadlift ramp sets: 60 kg×5, 72.5 kg×3, 80 kg×1",
-    "warmup_min": 11,
-    "cooldown": "5 min easy walk; hamstring stretch 30s each; hip flexor stretch 30s each; lat stretch 30s each side",
+    "warmup": "5 min: leg swings, hip circles, goblet squat × 10 with light KB; then deadlift ramp: 50 kg × 5, 65 kg × 3, 75 kg × 1",
+    "warmup_min": 12,
+    "cooldown": "5 min: pigeon stretch, supine hamstring stretch, slow breathing",
     "cooldown_min": 5,
     "exercises": [
       {
@@ -189,26 +198,26 @@
         "sets": 3,
         "reps": "5",
         "rest_seconds": 180,
-        "rpe_target": 7,
-        "notes": "85 kg — baseline working weight; brace hard, neutral spine",
+        "rpe_target": 8,
+        "notes": "Start at 85 kg linear progression",
         "completed_sets": []
       },
       {
-        "name": "Incline Dumbbell Press",
+        "name": "Goblet Squat",
         "sets": 3,
-        "reps": "8",
+        "reps": "10",
         "rest_seconds": 90,
-        "rpe_target": 7,
-        "notes": "Start at 20 kg each; moderate incline ~30°, elbows tucked in",
+        "rpe_target": 6,
+        "notes": "Light to moderate KB; reinforce depth and bracing",
         "completed_sets": []
       },
       {
-        "name": "Dumbbell Row",
+        "name": "Hip Thrust (barbell or bodyweight+plate)",
         "sets": 3,
-        "reps": "8",
+        "reps": "10",
         "rest_seconds": 90,
         "rpe_target": 7,
-        "notes": "20 kg each side — same as day 2 to confirm baseline",
+        "notes": "Full glute lockout at top",
         "completed_sets": []
       },
       {
@@ -216,18 +225,18 @@
         "sets": 3,
         "reps": "10 each side",
         "rest_seconds": 60,
-        "rpe_target": 6,
-        "notes": "Slow and controlled; lower back stays pressed to floor",
+        "rpe_target": 5,
+        "notes": "Controlled; lower back flat on floor throughout",
         "completed_sets": []
       }
     ],
-    "rationale": "Second strength session of the week hits the deadlift (separate from squat day) plus upper-body accessories within shoulder constraints.",
+    "rationale": "Second lower session pairs conventional deadlift with squat variation and posterior-chain accessories — no back squat to comply with deadlift/squat separation rule.",
     "status": "planned",
-    "generated_at": "2026-07-05T06:30:07.451Z"
+    "generated_at": "2026-07-05T06:31:35.351Z"
   },
   {
     "date": "2026-07-10",
-    "program_id": "prog-1783233007451",
+    "program_id": "prog-1783233095350",
     "day_offset": 6,
     "focus": "Rest",
     "is_rest_day": true,
@@ -237,8 +246,8 @@
     "cooldown": "",
     "cooldown_min": null,
     "exercises": [],
-    "rationale": "End-of-week rest day — 3 training sessions completed this week, full recovery before week 2 begins.",
+    "rationale": "End-of-week rest day to consolidate week-one training adaptations ahead of next cycle.",
     "status": "rest",
-    "generated_at": "2026-07-05T06:30:07.451Z"
+    "generated_at": "2026-07-05T06:31:35.351Z"
   }
 ]
