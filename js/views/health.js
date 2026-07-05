@@ -17,6 +17,12 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+function vo2BadgeClass(cls) {
+  if (cls === "Below average") return "red";
+  if (cls === "Average") return "yellow";
+  return "green"; // Good / Excellent
+}
+
 export async function render(container) {
   let health = getLocal("garmin_health");
   let wellness = getLocal("garmin_wellness");
@@ -70,7 +76,7 @@ export async function render(container) {
 
       <div class="card">
         <h2>VO2 Max</h2>
-        ${vo2Value ? `<div class="row"><div style="font-size:28px;font-weight:800">${vo2Value.toFixed(1)}</div>${vo2Class ? `<span class="badge green">${vo2Class}</span>` : ""}</div>` : `<p>No VO2 max data yet.</p>`}
+        ${vo2Value ? `<div class="row"><div style="font-size:28px;font-weight:800">${vo2Value.toFixed(1)}</div>${vo2Class ? `<span class="badge ${vo2BadgeClass(vo2Class)}">${vo2Class}</span>` : ""}</div>` : `<p>No VO2 max data yet.</p>`}
         ${bands.length ? lineChartWithBands(vo2Series, bands) : (vo2Series.length ? lineChart(vo2Series) : "")}
         ${!profile.age ? `<p style="font-size:12px">Set your age in onboarding/profile to see percentile bands.</p>` : ""}
       </div>

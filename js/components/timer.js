@@ -71,6 +71,7 @@ export function showRestTimer({ seconds, exerciseLabel, nextLabel }) {
     }
 
     function tick() {
+      if (finished) return; // a pending setTimeout can fire after skip/finish — stop the loop
       const remaining = Math.max(0, Math.round((endAt - Date.now()) / 1000));
       const display = overlay.querySelector("#timer-display");
       if (display) display.textContent = format(remaining);

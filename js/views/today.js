@@ -10,7 +10,6 @@ import {
   programDays,
   activeProgram,
   setDayStatus,
-  hasMissedDays,
   readjustRemainingWeek,
   todayStr,
 } from "../lib/program.js";
@@ -314,7 +313,7 @@ export async function render(container) {
         } catch (e) {
           toast(e.message, "error");
           readjustBtn.disabled = false;
-          readjustBtn.textContent = "Readjust week";
+          readjustBtn.textContent = "Readjust";
         }
       });
     }
@@ -497,7 +496,9 @@ export async function render(container) {
         await save("workouts", allWorkouts, "chore: post-workout feedback");
         workouts = allWorkouts;
         if (logEntries.length) {
-          const log = getLocal("exercise_log");
+          // Idempotent: drop any prior planned entries for this day so re-marking done
+          // doesn't create duplicate log rows (which would inflate volume/1RM trends).
+          const log = getLocal("exercise_log").filter((e) => !(e.source === "planned" && e.date === workout.date));
           await save("exercise_log", [...log, ...logEntries], "log: planned workout completion");
         }
         overlay.remove();
