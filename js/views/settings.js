@@ -3,6 +3,7 @@ import { triggerGarminSync } from "../github.js";
 import { toast } from "../components/toast.js";
 import { estimateMaxHR, defaultZones } from "../lib/zones.js";
 import { cmToFtIn, ftInToCm } from "../lib/units.js";
+import { APP_VERSION } from "../version.js";
 
 export async function render(container) {
   const s = getSettings();
@@ -40,6 +41,7 @@ export async function render(container) {
     <div class="card stack">
       <button id="save-settings">Save settings</button>
       <div id="save-status"></div>
+      <p style="font-size:11px;color:var(--text-dim);margin:0;text-align:center">Build ${APP_VERSION}</p>
     </div>
 
     ${wasConfigured ? `
