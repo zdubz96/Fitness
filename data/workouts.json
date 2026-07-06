@@ -84,9 +84,9 @@
     "focus": "Upper body strength",
     "is_rest_day": false,
     "duration_min": 60,
-    "warmup": "5 min: arm circles, band pull-aparts × 15, shoulder CARs, light dumbbell lateral raise × 12 each side; then bench ramp: empty bar × 8, 35 kg × 5, 47.5 kg × 3",
+    "warmup": "5 min general: arm circles × 10 each direction, band pull-aparts × 15, shoulder CARs × 5 each side, light dumbbell lateral raise × 12 each side; then bench ramp: empty bar × 8, 35 kg × 5, 47.5 kg × 3",
     "warmup_min": 10,
-    "cooldown": "5 min: doorway pec stretch (gentle), cross-body shoulder stretch, thoracic extension over bench edge, slow breathing",
+    "cooldown": "5 min: doorway pec stretch 30 s each side (gentle, no forcing), cross-body shoulder stretch 30 s each side, thoracic extension over bench edge 60 s, slow diaphragmatic breathing",
     "cooldown_min": 5,
     "exercises": [
       {
@@ -95,7 +95,7 @@
         "reps": "15",
         "rest_seconds": 60,
         "rpe_target": 6,
-        "notes": "Shoulder prehab — non-negotiable opener",
+        "notes": "Shoulder prehab — non-negotiable opener every upper session. Pull to forehead level, elbows high, controlled return.",
         "completed_sets": []
       },
       {
@@ -104,7 +104,7 @@
         "reps": "5",
         "rest_seconds": 180,
         "rpe_target": 8,
-        "notes": "Start at 55 kg; elbows 45–60° from torso",
+        "notes": "Working weight 55 kg — first structured session so match baseline. Elbows 45–60° from torso, blades retracted and depressed. Stop immediately at any anterior shoulder discomfort.",
         "completed_sets": []
       },
       {
@@ -113,7 +113,7 @@
         "reps": "10",
         "rest_seconds": 90,
         "rpe_target": 7,
-        "notes": "Brace on bench; full retraction at top",
+        "notes": "Brace knee and hand on bench; drive elbow to hip, full retraction at top. Choose a weight where rep 10 is challenging but form stays tight.",
         "completed_sets": []
       },
       {
@@ -122,7 +122,7 @@
         "reps": "10",
         "rest_seconds": 90,
         "rpe_target": 7,
-        "notes": "Neutral or shoulder-width grip; controlled",
+        "notes": "Neutral or shoulder-width overhand grip; slight lean back, pull to upper chest, controlled 3-second eccentric. Avoid behind-the-neck position.",
         "completed_sets": []
       },
       {
@@ -131,13 +131,13 @@
         "reps": "12",
         "rest_seconds": 60,
         "rpe_target": 6,
-        "notes": "Light load; avoid impingement at top",
+        "notes": "Light load; cable from low pulley, raise to shoulder height only — stop before impingement zone. Prefer cable over heavy dumbbell for rotator cuff safety.",
         "completed_sets": []
       }
     ],
-    "rationale": "First structured upper session — establishes bench baseline and hits vertical pull, horizontal pull, and shoulder isolation within shoulder constraints.",
+    "rationale": "Upper body session is unaffected by yesterday's walking fatigue and is kept as planned, with a mildly conservative approach given slightly elevated resting HR and suppressed HRV today.",
     "status": "planned",
-    "generated_at": "2026-07-05T06:31:35.350Z"
+    "generated_at": "2026-07-06T20:30:36.822Z"
   },
   {
     "date": "2026-07-07",
@@ -145,25 +145,25 @@
     "day_offset": 3,
     "focus": "Zone 2 pool swim",
     "is_rest_day": false,
-    "duration_min": 40,
-    "warmup": "2 easy lengths (any stroke) at very relaxed pace — HR should stay below 110 bpm",
-    "warmup_min": 4,
-    "cooldown": "2 easy lengths easy backstroke or float, then poolside calf stretch and hip flexor stretch",
-    "cooldown_min": 4,
+    "duration_min": 55,
+    "warmup": "3 min easy water acclimation: 2 slow lengths any stroke, focus on breathing rhythm and loosening shoulders",
+    "warmup_min": 5,
+    "cooldown": "3 min: 2 very easy backstroke lengths, then poolside calf stretch 30 s each leg, hip flexor lunge stretch 30 s each side, gentle shoulder cross-body stretch",
+    "cooldown_min": 5,
     "exercises": [
       {
         "name": "Continuous Freestyle Swim",
         "sets": 1,
-        "reps": "22 min",
+        "reps": "25–30 min",
         "rest_seconds": 0,
-        "rpe_target": 6,
-        "notes": "Target avg HR 112–131 bpm; match or beat 550 m baseline",
+        "rpe_target": 5,
+        "notes": "Target avg HR 112–131 bpm (Zone 2). Aim to match or slightly exceed your 550 m baseline — target ~575–600 m if the effort feels comfortable. Pace should feel conversational; if HR climbs above 135 bpm, ease off. This is aerobic base work — no spikes. Log distance and avg HR via Garmin.",
         "completed_sets": []
       }
     ],
-    "rationale": "Zone 2 aerobic base session — builds VO2 max foundation using pool (preferred over running) while keeping intensity steady and within target band.",
+    "rationale": "Zone 2 swim as originally planned — low mechanical load complements yesterday's upper strength session and gives legs further recovery after Sunday's heavy walking.",
     "status": "planned",
-    "generated_at": "2026-07-05T06:31:35.350Z"
+    "generated_at": "2026-07-06T20:30:36.822Z"
   },
   {
     "date": "2026-07-08",
@@ -177,9 +177,9 @@
     "cooldown": "",
     "cooldown_min": null,
     "exercises": [],
-    "rationale": "Midweek rest after three consecutive training days to allow recovery before the second strength block.",
+    "rationale": "Scheduled rest day — maintains the planned recovery buffer before Thursday's lower body session.",
     "status": "rest",
-    "generated_at": "2026-07-05T06:31:35.350Z"
+    "generated_at": "2026-07-06T20:30:36.822Z"
   },
   {
     "date": "2026-07-09",
@@ -188,18 +188,27 @@
     "focus": "Lower body strength",
     "is_rest_day": false,
     "duration_min": 60,
-    "warmup": "5 min: leg swings, hip circles, goblet squat × 10 with light KB; then deadlift ramp: 50 kg × 5, 65 kg × 3, 75 kg × 1",
+    "warmup": "5 min general: leg swings front-back and lateral × 10 each, hip circles × 8 each direction, bodyweight squats × 10, glute bridges × 12; then squat ramp: empty bar × 8, 40 kg × 5, 57.5 kg × 3, 65 kg × 2",
     "warmup_min": 12,
-    "cooldown": "5 min: pigeon stretch, supine hamstring stretch, slow breathing",
+    "cooldown": "5 min: standing quad stretch 30 s each, kneeling hip flexor stretch 40 s each side, seated hamstring stretch 30 s each side, pigeon pose or figure-4 glute stretch 40 s each side",
     "cooldown_min": 5,
     "exercises": [
       {
-        "name": "Barbell Conventional Deadlift",
+        "name": "Barbell Back Squat",
         "sets": 3,
         "reps": "5",
         "rest_seconds": 180,
         "rpe_target": 8,
-        "notes": "Start at 85 kg linear progression",
+        "notes": "Working weight 72.5 kg — this is your Week 1 starting point per the linear progression plan. Full depth, flat heels, braced core. If all 3 sets feel strong and controlled (RPE ≤ 8), you're on track to add 5 kg next session.",
+        "completed_sets": []
+      },
+      {
+        "name": "Romanian Deadlift",
+        "sets": 3,
+        "reps": "8",
+        "rest_seconds": 120,
+        "rpe_target": 7,
+        "notes": "Hip hinge accessory — NOT a conventional deadlift. Start at ~60–65 kg; hinge at hips, soft knee bend, bar stays close to legs, lower until you feel hamstring tension (typically mid-shin level). No rounding.",
         "completed_sets": []
       },
       {
@@ -208,31 +217,31 @@
         "reps": "10",
         "rest_seconds": 90,
         "rpe_target": 6,
-        "notes": "Light to moderate KB; reinforce depth and bracing",
+        "notes": "Use a dumbbell or kettlebell (~20–24 kg). Reinforces squat pattern, adds quad volume, low axial load. Pause 1 second at the bottom.",
         "completed_sets": []
       },
       {
-        "name": "Hip Thrust (barbell or bodyweight+plate)",
+        "name": "Leg Curl (machine)",
         "sets": 3,
-        "reps": "10",
-        "rest_seconds": 90,
+        "reps": "12",
+        "rest_seconds": 75,
         "rpe_target": 7,
-        "notes": "Full glute lockout at top",
+        "notes": "Hamstring isolation. Choose a weight where reps 10–12 are genuinely challenging. Controlled eccentric — 2–3 seconds lowering.",
         "completed_sets": []
       },
       {
-        "name": "Dead Bug",
+        "name": "Plank Hold",
         "sets": 3,
-        "reps": "10 each side",
+        "reps": "60–75 s",
         "rest_seconds": 60,
-        "rpe_target": 5,
-        "notes": "Controlled; lower back flat on floor throughout",
+        "rpe_target": 6,
+        "notes": "Forearm plank, neutral spine — no sagging hips. This is your baseline standard (90 s was your test result post-fatigue); aim for 60–75 s fresh with perfect form. Stop if hips drop.",
         "completed_sets": []
       }
     ],
-    "rationale": "Second lower session pairs conventional deadlift with squat variation and posterior-chain accessories — no back squat to comply with deadlift/squat separation rule.",
+    "rationale": "Consolidates the missed Monday lower session into Thursday's planned slot — fresh after a full rest day, with the squat at the Week 1 baseline weight and posterior-chain accessories kept as hip-hinge variations to comply with the squat+deadlift separation rule.",
     "status": "planned",
-    "generated_at": "2026-07-05T06:31:35.351Z"
+    "generated_at": "2026-07-06T20:30:36.823Z"
   },
   {
     "date": "2026-07-10",
@@ -246,8 +255,8 @@
     "cooldown": "",
     "cooldown_min": null,
     "exercises": [],
-    "rationale": "End-of-week rest day to consolidate week-one training adaptations ahead of next cycle.",
+    "rationale": "Scheduled rest day to close out the week and allow full recovery before next week's training block begins.",
     "status": "rest",
-    "generated_at": "2026-07-05T06:31:35.351Z"
+    "generated_at": "2026-07-06T20:30:36.823Z"
   }
 ]
