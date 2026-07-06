@@ -40,5 +40,33 @@
     "name": "Strength",
     "training_load": null,
     "type": "strength_training"
+  },
+  {
+    "aerobic_effect": null,
+    "anaerobic_effect": null,
+    "avg_hr": 111.0,
+    "calories": 563.0,
+    "date": "2026-07-05",
+    "distance_meters": 7884.22021484375,
+    "duration_seconds": 9130.8173828125,
+    "id": 23494912991,
+    "max_hr": 151.0,
+    "name": "Chelan County Walking",
+    "training_load": null,
+    "type": "walking"
+  },
+  {
+    "aerobic_effect": null,
+    "anaerobic_effect": null,
+    "avg_hr": 113.0,
+    "calories": 463.0,
+    "date": "2026-07-05",
+    "distance_meters": 5882.16015625,
+    "duration_seconds": 7215.5439453125,
+    "id": 23494911969,
+    "max_hr": 146.0,
+    "name": "Whatcom County Walking",
+    "training_load": null,
+    "type": "walking"
   }
 ]
