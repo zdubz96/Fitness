@@ -96,7 +96,9 @@
         "rest_seconds": 60,
         "rpe_target": 6,
         "notes": "Shoulder prehab — non-negotiable opener every upper session. Pull to forehead level, elbows high, controlled return.",
-        "completed_sets": []
+        "completed_sets": [
+          true
+        ]
       },
       {
         "name": "Barbell Bench Press",
