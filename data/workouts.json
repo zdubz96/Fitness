@@ -122,7 +122,9 @@
           true,
           true,
           true
-        ]
+        ],
+        "logged_weight": 17.7,
+        "logged_weight_unit": "kg"
       },
       {
         "name": "Lat Pulldown",
