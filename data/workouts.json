@@ -106,6 +106,7 @@
         "rpe_target": 8,
         "notes": "Working weight 55 kg — first structured session so match baseline. Elbows 45–60° from torso, blades retracted and depressed. Stop immediately at any anterior shoulder discomfort.",
         "completed_sets": [
+          true,
           true
         ]
       },
