@@ -134,10 +134,12 @@
         "rpe_target": 7,
         "notes": "Neutral or shoulder-width overhand grip; slight lean back, pull to upper chest, controlled 3-second eccentric. Avoid behind-the-neck position.",
         "completed_sets": [
-          null,
-          null,
+          true,
+          true,
           true
-        ]
+        ],
+        "logged_weight": 33,
+        "logged_weight_unit": "kg"
       },
       {
         "name": "Cable Lateral Raise",
