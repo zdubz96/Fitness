@@ -166,8 +166,13 @@
       }
     ],
     "rationale": "Upper body session is unaffected by yesterday's walking fatigue and is kept as planned, with a mildly conservative approach given slightly elevated resting HR and suppressed HRV today.",
-    "status": "planned",
-    "generated_at": "2026-07-06T20:30:36.822Z"
+    "status": "completed",
+    "generated_at": "2026-07-06T20:30:36.822Z",
+    "feedback": {
+      "difficulty": "right",
+      "note": null,
+      "at": "2026-07-07T01:29:27.488Z"
+    }
   },
   {
     "date": "2026-07-07",
