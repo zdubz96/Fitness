@@ -115,7 +115,9 @@
           true,
           true,
           true
-        ]
+        ],
+        "logged_weight": 55,
+        "logged_weight_unit": "kg"
       },
       {
         "name": "Dumbbell Row (single-arm)",
