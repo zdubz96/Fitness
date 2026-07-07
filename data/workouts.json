@@ -98,8 +98,11 @@
         "notes": "Shoulder prehab — non-negotiable opener every upper session. Pull to forehead level, elbows high, controlled return.",
         "completed_sets": [
           true,
+          true,
           true
-        ]
+        ],
+        "logged_weight": 18,
+        "logged_weight_unit": "kg"
       },
       {
         "name": "Barbell Bench Press",
