@@ -149,6 +149,7 @@
         "rpe_target": 6,
         "notes": "Light load; cable from low pulley, raise to shoulder height only — stop before impingement zone. Prefer cable over heavy dumbbell for rotator cuff safety.",
         "completed_sets": [
+          true,
           true
         ]
       }
