@@ -72,15 +72,16 @@ Gaps:
 
 | Priority | Items | Theme |
 |---|---|---|
-| **P0 — ships WITH the migration** (incomplete without) | ENG Part 3 (auth, DB, coach-proxy) + PROD-1, 5, 6, 16, 17 | Safe, honest, complete multi-tenant baseline |
-| **P1 — first fast-follows** | PROD-2, 3, 7, 8, 9, 12, 13, 18 | Onboarding polish, daily-loop depth, retention |
-| **P2 — delight & growth** | PROD-4, 10, 11, 14, 15, 19, 20 | Streaming, celebrations, nudges, share loops |
+| **P0 — ships WITH the migration** (incomplete without) | ENG Part 3 (auth, DB, coach-proxy, invite codes) + PROD-1, 5, 6, 16, 17 | Safe, honest, complete multi-tenant baseline |
+| **P1 — first fast-follows** | PROD-2, 3, 7, 8, 9, 13 (banner delivery, no push), 18 | Onboarding polish, daily-loop depth, retention |
+| **P2 — delight & growth** | PROD-4, 10, 11, 14, 19, 20 | Streaming, celebrations, share loops |
+| **Deferred (owner decision)** | PROD-12, PROD-15, push delivery of PROD-13, custom domain | Revisit after multi-tenant settles |
 
 **Effort ballparks:** P0 ≈ the migration itself + ~4 small features (days of model-implementation work). P1 items are each hours-to-a-day. P2 items are each small except streaming (PROD-11, coupled to ENG §3.3).
 
-## Open questions for the owner (answer before implementation)
+## Owner decisions (RESOLVED 2026-07-05 — implementation model: treat these as fixed requirements)
 
-1. **Quota default** — 300k tokens/month (~$1–3/user) is proposed in ENG §3.2. Comfortable? Want a global monthly spend ceiling too?
-2. **Who can sign up** — open registration, or an invite-code gate (one `invite_codes` table; friends-only keeps costs predictable)?
-3. **Push notifications** — comfortable with the iOS "must install to Home Screen" caveat, or defer PROD-12/13 push and keep in-app banners initially?
-4. **App name & URL** — "AI Trainer" on `zdubz96.github.io/Fitness` is fine for friends; a custom domain (~$10/yr) makes sharing feel more legit. Worth it?
+1. **Quota default:** ✅ confirmed — 300k tokens/user/month as specified in ENG §3.2. No change.
+2. **Signup:** ✅ **invite-code gate.** Registration requires a valid invite code (see ENG §3.2 `invite_codes` table). Owner generates codes; friends-only keeps costs predictable. PROD-1's signup screen gains an invite-code field.
+3. **Push notifications:** ✅ **deferred.** PROD-12 and PROD-13's push components move out of scope for now; keep the in-app banner pattern (Today-view banners) for reminders and review-ready notices. PROD-13's *server-side scheduled review generation* may still be implemented (the review waits in the DB and surfaces via banner on open) — only the push delivery is deferred.
+4. **Name & domain:** ✅ staying "AI Trainer" at `zdubz96.github.io/Fitness` for now. No custom domain work.

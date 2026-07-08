@@ -79,7 +79,7 @@ No written schema exists. Add `docs/DATA_SCHEMA.md` documenting every `data/*.js
 
 ## Part 3 — Multi-tenant architecture (RECOMMENDED: Supabase)
 
-**Decision context (from the owner):** Garmin becomes **optional**, and the **owner pays for Anthropic tokens**. This removes the two historical blockers for hosting (custody of users' Garmin passwords; unbounded LLM spend — bounded below by quotas). Target: friends sign up with email and use the app immediately.
+**Decision context (from the owner, all CONFIRMED 2026-07-05):** Garmin becomes **optional**; the **owner pays for Anthropic tokens** with the **300k tokens/user/month default quota**; registration is **invite-code gated** (friends only); **push notifications are deferred** (in-app banners remain the delivery mechanism — do not build web-push infrastructure now); app stays "AI Trainer" on GitHub Pages (no custom domain). These are fixed requirements, not open questions.
 
 ### 3.1 Component overview
 
@@ -152,10 +152,22 @@ create table usage (
 );
 create table user_settings (
   user_id uuid primary key references auth.users(id) on delete cascade,
-  monthly_token_cap bigint not null default 300000,   -- owner-adjustable per user
+  monthly_token_cap bigint not null default 300000,   -- owner-adjustable per user (CONFIRMED default)
   garmin_ingest_token text                            -- random secret for the BYO-sync path
 );
+
+-- invite gate (OWNER DECISION: registration requires a valid invite code)
+create table invite_codes (
+  code text primary key,                -- owner-generated, e.g. 8-char random
+  created_by uuid references auth.users(id),
+  used_by uuid references auth.users(id),
+  used_at timestamptz,
+  max_uses int not null default 1,
+  uses int not null default 0
+);
 ```
+
+**Invite-code enforcement:** simplest robust approach — a `signup` edge function (service role) that validates the code and calls `auth.admin.createUser`, incrementing `uses`; client signup form posts email/password/code to it instead of calling `supabase.auth.signUp` directly. (Alternative: DB trigger on `auth.users` insert checking a code passed in user metadata — acceptable, but the edge function gives clearer error messages.) Owner generates codes by inserting rows via the Supabase dashboard.
 
 RLS note: `usage` and `user_settings` are select-only for the user (writes happen with the service key inside edge functions). `garmin_*` insert policy additionally allows the `garmin-ingest` function (service role bypasses RLS anyway).
 
@@ -176,7 +188,7 @@ RLS note: `usage` and `user_settings` are select-only for the user (writes happe
 - `refresh(name)` → supabase select for that user (RLS scopes it); map rows back to the array/object shapes views expect (e.g. `workouts` rows → array of `day` jsonb with `date` merged in).
 - `save(name, data)` → upserts. For `workouts`, upsert by `(user_id, date)`; for append-only types insert only new rows (compare by id). Per-set ticks become single-row upserts — cheap, which retires ENG-3.
 - `getSettings()` shrinks to UI prefs only; tokens/owner/repo fields and `js/github.js` data usage are removed. Login state comes from `supabase.auth`.
-- Auth gating: `js/app.js` route() — if no session → render new `js/views/auth.js` (sign in / sign up / reset); after sign-in, existing onboarding gate takes over.
+- Auth gating: `js/app.js` route() — if no session → render new `js/views/auth.js` (sign in / sign up with **invite code field** / reset); signup posts to the `signup` edge function (see §3.2). After sign-in, the existing onboarding gate takes over.
 
 ### 3.5 Optional Garmin path (no credential custody)
 
