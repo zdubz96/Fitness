@@ -294,6 +294,7 @@
         "rpe_target": 6,
         "notes": "Forearm plank, neutral spine — no sagging hips. This is your baseline standard (90 s was your test result post-fatigue); aim for 60–75 s fresh with perfect form. Stop if hips drop.",
         "completed_sets": [
+          true,
           true
         ]
       }
