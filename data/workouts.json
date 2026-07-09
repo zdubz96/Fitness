@@ -252,7 +252,9 @@
           true,
           true,
           true
-        ]
+        ],
+        "logged_weight": 60,
+        "logged_weight_unit": "kg"
       },
       {
         "name": "Goblet Squat",
@@ -261,7 +263,9 @@
         "rest_seconds": 90,
         "rpe_target": 6,
         "notes": "Use a dumbbell or kettlebell (~20–24 kg). Reinforces squat pattern, adds quad volume, low axial load. Pause 1 second at the bottom.",
-        "completed_sets": []
+        "completed_sets": [
+          true
+        ]
       },
       {
         "name": "Leg Curl (machine)",
