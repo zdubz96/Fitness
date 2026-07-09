@@ -48,6 +48,17 @@ export function effectiveLoad(a) {
  * @param {Array} data.activities - garmin_activities.json rows {date, training_load}
  */
 export function computeRecoveryStatus({ wellness = [], health = [], activities = [] }) {
+  // No wearable data at all (PROD-5): a green "all normal" badge would be actively misleading
+  // for a user who has never connected Garmin. Distinguish "no signal" from "good signal".
+  const hasAnyData = wellness.length > 0 || health.length > 0 || activities.length > 0;
+  if (!hasAnyData) {
+    return {
+      level: "unknown",
+      reasons: ["No wearable data connected yet. Log a quick check-in or connect Garmin to get recovery tracking."],
+      metrics: {},
+    };
+  }
+
   const reasons = [];
   let flagCount = 0;
 

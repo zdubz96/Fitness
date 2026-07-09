@@ -1,6 +1,7 @@
-import { isConfigured, getLocal } from "./state.js";
+import { isSignedIn, refreshAll, getLocal } from "./state.js";
 import { toast } from "./components/toast.js";
 import { unlockAudio } from "./lib/audio.js";
+import { supabase } from "./supabase/client.js";
 
 window.addEventListener("pointerdown", unlockAudio, { once: true });
 
@@ -21,6 +22,8 @@ app.innerHTML = `
 const viewEl = document.getElementById("view");
 const tabbarEl = document.getElementById("tabbar");
 
+let dataLoadedForSession = false;
+
 function currentRoute() {
   const hash = location.hash.replace(/^#\/?/, "");
   return hash || "today";
@@ -35,13 +38,37 @@ function renderTabbar(active) {
 }
 
 async function route() {
-  const configured = isConfigured();
+  const signedIn = await isSignedIn();
+
+  if (!signedIn) {
+    dataLoadedForSession = false;
+    tabbarEl.innerHTML = "";
+    const mod = await import("./views/auth.js");
+    await mod.render(viewEl, {
+      onSignedIn: async () => {
+        await loadDataThenRoute();
+      },
+    });
+    return;
+  }
+
+  // First route() after a page (re)load with an existing session: populate the local cache
+  // from Supabase before rendering anything that reads it (trainer_profile in particular).
+  if (!dataLoadedForSession) {
+    viewEl.innerHTML = `<div class="row" style="justify-content:center;padding:40px 0"><div class="spinner"></div></div>`;
+    try {
+      await refreshAll();
+      dataLoadedForSession = true;
+    } catch (e) {
+      console.error(e);
+      toast("Couldn't load your data — check your connection.", "error");
+    }
+  }
+
   const profile = getLocal("trainer_profile");
   let id = currentRoute();
 
-  if (!configured) {
-    id = "settings";
-  } else if (!profile?.onboarding_complete && id !== "settings") {
+  if (!profile?.onboarding_complete && id !== "settings") {
     tabbarEl.innerHTML = "";
     const mod = await import("./views/onboarding.js");
     await mod.render(viewEl, { onComplete: () => (location.hash = "#/today") });
@@ -62,8 +89,7 @@ async function route() {
   }
 
   const tab = TABS.find((t) => t.id === id) || TABS[0];
-  renderTabbar(configured ? tab.id : null);
-  if (!configured) tabbarEl.innerHTML = "";
+  renderTabbar(tab.id);
 
   viewEl.innerHTML = `<div class="row" style="justify-content:center;padding:40px 0"><div class="spinner"></div></div>`;
   try {
@@ -76,11 +102,24 @@ async function route() {
   }
 }
 
+async function loadDataThenRoute() {
+  dataLoadedForSession = false;
+  await route();
+}
+
 function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str;
   return div.innerHTML;
 }
+
+// Re-route on sign-out (e.g. from the Settings tab) so the auth screen appears immediately.
+supabase.auth.onAuthStateChange((event) => {
+  if (event === "SIGNED_OUT") {
+    dataLoadedForSession = false;
+    route();
+  }
+});
 
 window.addEventListener("hashchange", route);
 route();

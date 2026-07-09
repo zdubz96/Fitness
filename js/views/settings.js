@@ -1,50 +1,56 @@
-import { getSettings, saveSettings, isConfigured, refreshAll, getLocal, save } from "../state.js";
-import { triggerGarminSync } from "../github.js";
+import { getLocal, save } from "../state.js";
 import { toast } from "../components/toast.js";
 import { estimateMaxHR, defaultZones } from "../lib/zones.js";
 import { cmToFtIn, ftInToCm } from "../lib/units.js";
 import { APP_VERSION } from "../version.js";
+import { supabase, getSession } from "../supabase/client.js";
+import { exportAllData, deleteAccount, signOut } from "../supabase/account.js";
+
+function currentMonthKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
 
 export async function render(container) {
-  const s = getSettings();
-  const wasConfigured = isConfigured();
   const profile = getLocal("trainer_profile") || {};
   const age = profile.age;
   const estMaxHR = age ? estimateMaxHR(age) : null;
   const maxHR = profile.max_hr || estMaxHR || "";
-  const zones = profile.zones || (maxHR ? defaultZones(maxHR) : null);
   const units = profile.units || "lb";
   const heightCm = profile.height_cm ?? null;
   const heightFtIn = heightCm != null ? cmToFtIn(heightCm) : { ft: "", inches: "" };
 
+  const session = await getSession();
+  const email = session?.user?.email ?? "—";
+
+  let usageHtml = `<p style="font-size:13px">Loading...</p>`;
+  const month = currentMonthKey();
+  const [{ data: usageRow }, { data: settingsRow }] = await Promise.all([
+    supabase.from("usage").select("input_tokens, output_tokens").eq("user_id", session.user.id).eq("month", month).maybeSingle(),
+    supabase.from("user_settings").select("monthly_token_cap").eq("user_id", session.user.id).maybeSingle(),
+  ]);
+  const used = (usageRow?.input_tokens ?? 0) + (usageRow?.output_tokens ?? 0);
+  const cap = settingsRow?.monthly_token_cap ?? 300000;
+  const pct = Math.min(100, Math.round((used / cap) * 100));
+
   container.innerHTML = `
-    ${!wasConfigured ? `<div class="card"><h1>Welcome</h1><p>Enter your GitHub and Anthropic credentials to get started. Both are stored only in this browser's local storage — never committed.</p></div>` : `<h1>Settings</h1>`}
+    <h1>Settings</h1>
 
     <div class="card stack">
-      <h2>GitHub</h2>
-      <label for="gh-owner">Repo owner</label>
-      <input id="gh-owner" type="text" placeholder="yourusername" value="${s.githubOwner || ""}" />
-      <label for="gh-repo">Repo name</label>
-      <input id="gh-repo" type="text" placeholder="fitness-tracker" value="${s.githubRepo || ""}" />
-      <label for="gh-branch">Branch</label>
-      <input id="gh-branch" type="text" placeholder="main" value="${s.githubBranch || "main"}" />
-      <label for="gh-token">Fine-grained PAT (Contents + Actions: read/write)</label>
-      <input id="gh-token" type="password" placeholder="github_pat_..." value="${s.githubToken || ""}" />
+      <h2>Account</h2>
+      <p style="font-size:13px;color:var(--text-dim)">${email}</p>
+      <div>
+        <div class="row" style="font-size:13px"><span>Coach usage this month</span><span>${pct}%</span></div>
+        <div style="background:var(--bg-elev-2);border-radius:6px;height:8px;overflow:hidden;margin-top:4px">
+          <div style="width:${pct}%;background:${pct >= 90 ? "var(--bad)" : pct >= 70 ? "var(--warn)" : "var(--accent)"};height:100%"></div>
+        </div>
+        <p style="font-size:11px;color:var(--text-dim);margin:4px 0 0">${used.toLocaleString()} / ${cap.toLocaleString()} tokens — resets on the 1st</p>
+      </div>
+      <button id="export-data" class="secondary">Export my data</button>
+      <button id="sign-out" class="secondary">Sign out</button>
+      <button id="delete-account" class="danger">Delete account</button>
     </div>
 
-    <div class="card stack">
-      <h2>Anthropic</h2>
-      <label for="anthropic-key">API key</label>
-      <input id="anthropic-key" type="password" placeholder="sk-ant-..." value="${s.anthropicKey || ""}" />
-    </div>
-
-    <div class="card stack">
-      <button id="save-settings">Save settings</button>
-      <div id="save-status"></div>
-      <p style="font-size:11px;color:var(--text-dim);margin:0;text-align:center">Build ${APP_VERSION}</p>
-    </div>
-
-    ${wasConfigured ? `
     <div class="card stack">
       <h2>Units &amp; body</h2>
       <label for="units">Weight units</label>
@@ -64,116 +70,104 @@ export async function render(container) {
     </div>
 
     <div class="card stack">
-      <h2>Garmin Sync</h2>
-      <p>Triggers the garmin-sync GitHub Action immediately.</p>
-      <button id="sync-now" class="secondary">Sync now</button>
-    </div>
-
-    <div class="card stack">
       <h2>Heart rate zones</h2>
       <label for="max-hr">Max HR ${estMaxHR ? `(age-estimated: ${estMaxHR})` : ""}</label>
       <input id="max-hr" type="number" value="${maxHR}" />
       <div id="zone-preview"></div>
       <button id="save-zones" class="secondary">Save zones</button>
     </div>
-    ` : ""}
+
+    <div class="card stack">
+      <h2>Garmin</h2>
+      <p style="font-size:13px">Optional. Bring-your-own sync is coming soon — for now, log body weight and workouts manually in the Log tab.</p>
+    </div>
+
+    <p style="font-size:11px;color:var(--text-dim);margin:0;text-align:center">Build ${APP_VERSION}</p>
   `;
 
-  document.getElementById("save-settings").addEventListener("click", async () => {
-    const next = {
-      githubOwner: val("gh-owner"),
-      githubRepo: val("gh-repo"),
-      githubBranch: val("gh-branch") || "main",
-      githubToken: val("gh-token"),
-      anthropicKey: val("anthropic-key"),
-    };
-    saveSettings(next);
-    const statusEl = document.getElementById("save-status");
-    statusEl.innerHTML = `<div class="row"><div class="spinner"></div><span>Verifying + loading your data...</span></div>`;
+  document.getElementById("export-data").addEventListener("click", async (e) => {
+    e.target.disabled = true;
+    e.target.textContent = "Exporting...";
     try {
-      await refreshAll();
-      statusEl.innerHTML = "";
-      toast("Settings saved", "success");
-      location.hash = "#/today";
-      location.reload();
-    } catch (e) {
-      statusEl.innerHTML = `<p style="color:var(--bad)">${e.message}</p>`;
+      await exportAllData();
+      toast("Export downloaded", "success");
+    } catch (err) {
+      toast(err.message, "error");
+    } finally {
+      e.target.disabled = false;
+      e.target.textContent = "Export my data";
     }
   });
 
-  const syncBtn = document.getElementById("sync-now");
-  if (syncBtn) {
-    syncBtn.addEventListener("click", async () => {
-      syncBtn.disabled = true;
-      syncBtn.textContent = "Triggering...";
-      try {
-        await triggerGarminSync();
-        toast("Garmin sync triggered — check back in a minute or two", "success");
-      } catch (e) {
-        toast(e.message, "error");
-      } finally {
-        syncBtn.disabled = false;
-        syncBtn.textContent = "Sync now";
-      }
-    });
-  }
+  document.getElementById("sign-out").addEventListener("click", async () => {
+    await signOut();
+  });
+
+  document.getElementById("delete-account").addEventListener("click", async (e) => {
+    const confirmed = confirm(
+      "Permanently delete your account and all your data (workouts, logs, chats, everything)? This cannot be undone."
+    );
+    if (!confirmed) return;
+    e.target.disabled = true;
+    e.target.textContent = "Deleting...";
+    try {
+      await deleteAccount();
+      toast("Account deleted", "success");
+    } catch (err) {
+      toast(err.message, "error");
+      e.target.disabled = false;
+      e.target.textContent = "Delete account";
+    }
+  });
 
   const unitsSelect = document.getElementById("units");
-  if (unitsSelect) {
-    unitsSelect.addEventListener("change", () => {
-      const kg = unitsSelect.value === "kg";
-      document.getElementById("height-metric").style.display = kg ? "" : "none";
-      document.getElementById("height-imperial").style.display = kg ? "none" : "";
-    });
-    document.getElementById("save-body").addEventListener("click", async () => {
-      const newUnits = unitsSelect.value;
-      let cm = null;
-      if (newUnits === "kg") {
-        const v = Number(document.getElementById("height-cm").value);
-        cm = v || null;
-      } else {
-        const ft = Number(document.getElementById("height-ft").value);
-        const inches = Number(document.getElementById("height-in").value);
-        cm = ft || inches ? ftInToCm(ft, inches) : null;
-      }
-      const updated = { ...getLocal("trainer_profile"), units: newUnits };
-      if (cm != null) updated.height_cm = cm;
-      try {
-        await save("trainer_profile", updated, "chore: update units & height");
-        toast("Saved", "success");
-      } catch (e) {
-        toast(e.message, "error");
-      }
-    });
-  }
+  unitsSelect.addEventListener("change", () => {
+    const kg = unitsSelect.value === "kg";
+    document.getElementById("height-metric").style.display = kg ? "" : "none";
+    document.getElementById("height-imperial").style.display = kg ? "none" : "";
+  });
+  document.getElementById("save-body").addEventListener("click", async () => {
+    const newUnits = unitsSelect.value;
+    let cm = null;
+    if (newUnits === "kg") {
+      const v = Number(document.getElementById("height-cm").value);
+      cm = v || null;
+    } else {
+      const ft = Number(document.getElementById("height-ft").value);
+      const inches = Number(document.getElementById("height-in").value);
+      cm = ft || inches ? ftInToCm(ft, inches) : null;
+    }
+    const updated = { ...getLocal("trainer_profile"), units: newUnits };
+    if (cm != null) updated.height_cm = cm;
+    try {
+      await save("trainer_profile", updated);
+      toast("Saved", "success");
+    } catch (err) {
+      toast(err.message, "error");
+    }
+  });
 
   const maxHrInput = document.getElementById("max-hr");
   const zonePreview = document.getElementById("zone-preview");
   function renderZonePreview() {
     const mh = Number(maxHrInput.value);
-    if (!mh || !zonePreview) return;
+    if (!mh) return;
     const z = defaultZones(mh);
     zonePreview.innerHTML = `<div class="grid-2" style="margin-top:8px">${z
       .map((zone) => `<div class="card" style="margin:0;padding:8px"><strong>${zone.name}</strong><br/><span style="color:var(--text-dim)">${zone.low}-${zone.high} bpm</span></div>`)
       .join("")}</div>`;
   }
-  if (maxHrInput) {
-    maxHrInput.addEventListener("input", renderZonePreview);
-    renderZonePreview();
-    document.getElementById("save-zones").addEventListener("click", async () => {
-      const mh = Number(maxHrInput.value);
-      if (!mh) return toast("Enter a max HR first", "error");
-      const updated = { ...profile, max_hr: mh, zones: defaultZones(mh) };
-      try {
-        await save("trainer_profile", updated, "chore: update HR zones");
-        toast("Zones saved", "success");
-      } catch (e) {
-        toast(e.message, "error");
-      }
-    });
-  }
-
-  function val(id) {
-    return document.getElementById(id).value.trim();
-  }
+  maxHrInput.addEventListener("input", renderZonePreview);
+  renderZonePreview();
+  document.getElementById("save-zones").addEventListener("click", async () => {
+    const mh = Number(maxHrInput.value);
+    if (!mh) return toast("Enter a max HR first", "error");
+    const updated = { ...getLocal("trainer_profile"), max_hr: mh, zones: defaultZones(mh) };
+    try {
+      await save("trainer_profile", updated);
+      toast("Zones saved", "success");
+    } catch (err) {
+      toast(err.message, "error");
+    }
+  });
 }

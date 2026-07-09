@@ -67,6 +67,7 @@ p { color: var(--text-dim); line-height: 1.4; }
 .badge.green { background: rgba(52,211,153,0.15); color: var(--good); }
 .badge.yellow { background: rgba(251,191,36,0.15); color: var(--warn); }
 .badge.red { background: rgba(248,113,113,0.15); color: var(--bad); }
+.badge.unknown { background: rgba(151,166,189,0.15); color: var(--text-dim); }
 
 button, input, select, textarea {
   font-family: inherit;

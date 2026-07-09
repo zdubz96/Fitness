@@ -13,6 +13,7 @@ import {
   readjustRemainingWeek,
   todayStr,
 } from "../lib/program.js";
+import { needsCheckinToday, logWellnessCheckin, computeManualRecoverySignal } from "../lib/wellness_checkin.js";
 
 const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -27,6 +28,7 @@ function dowLabel(dateStr) {
 }
 
 const STATUS_DOT = { completed: "🟢", missed: "🔴", rest: "⚪", planned: "🔵" };
+const RECOVERY_LABEL = { green: "Ready", yellow: "Caution", red: "Fatigued", unknown: "No data" };
 
 export async function render(container) {
   let wellness = getLocal("garmin_wellness");
@@ -34,19 +36,34 @@ export async function render(container) {
   let activities = getLocal("garmin_activities");
   let workouts = getLocal("workouts");
   let reviews = getLocal("weekly_reviews");
+  let bodyMetrics = getLocal("body_metrics");
   let selectedDate = todayStr();
 
   paint();
 
-  Promise.all([refresh("garmin_wellness"), refresh("garmin_health"), refresh("garmin_activities"), refresh("workouts"), refresh("trainer_profile")])
-    .then(([w, h, a, wk]) => {
-      wellness = w; health = h; activities = a; workouts = wk;
+  Promise.all([
+    refresh("garmin_wellness"),
+    refresh("garmin_health"),
+    refresh("garmin_activities"),
+    refresh("workouts"),
+    refresh("trainer_profile"),
+    refresh("body_metrics"),
+  ])
+    .then(([w, h, a, wk, , bm]) => {
+      wellness = w; health = h; activities = a; workouts = wk; bodyMetrics = bm;
       paint();
     })
     .catch((e) => console.warn("Today refresh failed", e));
 
   function paint() {
-    const recovery = computeRecoveryStatus({ wellness, health, activities });
+    let recovery = computeRecoveryStatus({ wellness, health, activities });
+    // No wearable data at all: fall back to the manual check-in signal (PROD-5/PROD-6) so
+    // recovery coaching still works for users without a Garmin, instead of showing "unknown"
+    // forever.
+    if (recovery.level === "unknown") {
+      const manual = computeManualRecoverySignal(bodyMetrics);
+      if (manual.level !== "unknown") recovery = manual;
+    }
     const today = todayStr();
     const todaysWellness = wellness.find((w) => w.date === today) || {};
     const recent7Load = activities.slice(-7).reduce((s, a) => s + (effectiveLoad(a) || 0), 0);
@@ -79,10 +96,17 @@ export async function render(container) {
       <div class="card" id="recovery-card" style="cursor:pointer">
         <div class="row">
           <h2 style="margin:0">Recovery</h2>
-          <span class="badge ${recovery.level}">${recovery.level === "green" ? "Ready" : recovery.level === "yellow" ? "Caution" : "Fatigued"}</span>
+          <span class="badge ${recovery.level}">${RECOVERY_LABEL[recovery.level] || recovery.level}</span>
         </div>
-        <p style="margin:8px 0 0;font-size:13px">Tap for details</p>
+        <p style="margin:8px 0 0;font-size:13px">${recovery.level === "unknown" ? "No data yet — tap to log a quick check-in" : "Tap for details"}</p>
       </div>
+
+      ${needsCheckinToday() ? `<div class="card" style="border-color:var(--accent)">
+        <div class="row">
+          <div><strong>Quick check-in</strong><p style="margin:2px 0 0;font-size:13px">10 seconds: sleep, soreness, energy — helps your coach read recovery without a wearable.</p></div>
+          <button id="checkin-btn" class="secondary">Log</button>
+        </div>
+      </div>` : ""}
 
       <div class="grid-3">
         <div class="card" style="margin:0;text-align:center">
@@ -103,9 +127,64 @@ export async function render(container) {
     `;
 
     document.getElementById("recovery-card").addEventListener("click", () => showRecoveryModal(recovery));
+    document.getElementById("checkin-btn")?.addEventListener("click", () => showCheckinModal());
     wireReviewBanner();
     if (program) wireProgram(days, selected, today);
     else wireGenerateProgram();
+  }
+
+  function showCheckinModal() {
+    let sleepQuality = null, soreness = null, energy = null;
+    const overlay = document.createElement("div");
+    overlay.className = "timer-overlay";
+    overlay.style.padding = "24px";
+
+    function scale(label, field) {
+      return `<div style="margin-bottom:12px">
+        <label style="margin-bottom:6px">${label}</label>
+        <div class="grid-3" style="gap:6px">
+          ${[1, 2, 3, 4, 5]
+            .map((n) => `<button type="button" class="secondary checkin-choice" data-field="${field}" data-v="${n}" style="padding:10px 0">${n}</button>`)
+            .join("")}
+        </div>
+      </div>`;
+    }
+
+    overlay.innerHTML = `
+      <div class="card" style="max-width:420px;width:100%">
+        <h2 style="margin-top:0">Quick check-in</h2>
+        <p style="font-size:13px;color:var(--text-dim)">1 = poor, 5 = great</p>
+        ${scale("Sleep quality", "sleepQuality")}
+        ${scale("Soreness (5 = very sore)", "soreness")}
+        ${scale("Energy", "energy")}
+        <button id="checkin-submit">Save check-in</button>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    overlay.querySelectorAll(".checkin-choice").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const field = btn.dataset.field;
+        const v = Number(btn.dataset.v);
+        if (field === "sleepQuality") sleepQuality = v;
+        if (field === "soreness") soreness = v;
+        if (field === "energy") energy = v;
+        overlay.querySelectorAll(`.checkin-choice[data-field="${field}"]`).forEach((b) => (b.style.outline = ""));
+        btn.style.outline = "2px solid var(--accent)";
+      });
+    });
+
+    overlay.querySelector("#checkin-submit").addEventListener("click", async () => {
+      try {
+        await logWellnessCheckin({ sleepQuality, soreness, energy });
+        bodyMetrics = getLocal("body_metrics");
+        overlay.remove();
+        toast("Check-in logged", "success");
+        paint();
+      } catch (e) {
+        toast(e.message, "error");
+      }
+    });
   }
 
   function renderNoProgram() {

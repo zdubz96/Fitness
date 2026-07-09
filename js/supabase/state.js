@@ -1,7 +1,7 @@
-// Supabase-backed replacement for js/state.js. Mirrors the SAME public API
-// (getLocal, refresh, refreshAll, save, getSettings/saveSettings, isConfigured) so that when
-// this is wired into js/app.js, view files do not need to change. NOT imported by the live
-// app yet — see docs/SUPABASE_SETUP.md for the cutover step.
+// Supabase-backed data layer. Mirrors the public API of the original GitHub-backed js/state.js
+// (getLocal, refresh, refreshAll, save) so lib/view files import it unchanged via the js/state.js
+// re-export shim. Also exposes isSignedIn (replaces the old isConfigured gate) and getPrefs/
+// savePrefs for device-local UI preferences. See docs/SUPABASE_SETUP.md.
 import { supabase, getSession } from "./client.js";
 
 const PREFS_KEY = "ft_prefs"; // device-local UI prefs only (no secrets to store anymore)

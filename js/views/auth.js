@@ -1,8 +1,5 @@
-// Auth screen for the Supabase-backed multi-tenant version of the app: sign in, sign up
-// (gated by invite code via the `signup` edge function), and password reset.
-// NOT wired into js/app.js yet — this file exists for the cutover step described in
-// docs/SUPABASE_SETUP.md. Once wired, js/app.js's route() should render this when there is
-// no active Supabase session, instead of (or before) the current isConfigured() gate.
+// Auth screen: sign in, sign up (gated by invite code via the `signup` edge function), and
+// password reset. Rendered by js/app.js's route() whenever there is no active Supabase session.
 import { supabase } from "../supabase/client.js";
 import { SUPABASE_URL } from "../supabase/config.js";
 import { toast } from "../components/toast.js";
