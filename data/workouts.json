@@ -282,7 +282,9 @@
           true,
           true,
           true
-        ]
+        ],
+        "logged_weight": 30,
+        "logged_weight_unit": "kg"
       },
       {
         "name": "Plank Hold",
@@ -291,7 +293,9 @@
         "rest_seconds": 60,
         "rpe_target": 6,
         "notes": "Forearm plank, neutral spine — no sagging hips. This is your baseline standard (90 s was your test result post-fatigue); aim for 60–75 s fresh with perfect form. Stop if hips drop.",
-        "completed_sets": []
+        "completed_sets": [
+          true
+        ]
       }
     ],
     "rationale": "Consolidates the missed Monday lower session into Thursday's planned slot — fresh after a full rest day, with the squat at the Week 1 baseline weight and posterior-chain accessories kept as hip-hinge variations to comply with the squat+deadlift separation rule.",
