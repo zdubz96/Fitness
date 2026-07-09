@@ -236,6 +236,7 @@
         "rpe_target": 8,
         "notes": "Working weight 72.5 kg — this is your Week 1 starting point per the linear progression plan. Full depth, flat heels, braced core. If all 3 sets feel strong and controlled (RPE ≤ 8), you're on track to add 5 kg next session.",
         "completed_sets": [
+          true,
           true
         ]
       },
