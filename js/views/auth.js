@@ -122,7 +122,7 @@ export async function render(container, { onSignedIn } = {}) {
         const body = await res.json();
         if (!res.ok) throw new Error(body.detail || body.error || "Sign up failed");
         setStatus(
-          `<p style="color:var(--good);font-size:13px">Account created — check your email to confirm, then sign in.</p>`
+          `<p style="color:var(--good);font-size:13px">Account created — sign in below.</p>`
         );
         mode = "signin";
         setTimeout(paint, 1200);

@@ -85,7 +85,9 @@ are **not wired into the live app** yet. To test them without any risk to your c
    and calls `render(document.body, { onSignedIn: () => console.log("signed in!") })` — or ask
    your Sonnet implementation session to wire up a temporary `#/auth-test` route in a local
    branch for manual testing.
-3. Sign up with one of your invite codes, confirm the email, sign in.
+3. Sign up with one of your invite codes, then sign in with the same email/password.
+   (The `signup` function marks the email confirmed immediately — the invite code is the
+   trust gate, so there's no separate email-confirmation step or email to wait for.)
 4. Confirm a row appeared in `profiles` and `user_settings` for your new user (the
    `handle_new_user` trigger in `schema.sql` creates these automatically).
 

@@ -42,10 +42,15 @@ Deno.serve(async (req) => {
       return json({ error: "code_exhausted", detail: "That invite code has already been used." }, 403);
     }
 
+    // email_confirm: true — skip email confirmation entirely. admin.createUser() does NOT
+    // send a confirmation email on its own (only the client-side auth.signUp() does that), so
+    // leaving this false would strand the account in an unconfirmed, unusable state with no
+    // email ever sent. The invite code above is already the trust gate for this app, so
+    // requiring a second confirmation step is redundant.
     const { data: created, error: createErr } = await db.auth.admin.createUser({
       email,
       password,
-      email_confirm: false, // Supabase sends the confirmation email itself
+      email_confirm: true,
     });
     if (createErr || !created?.user) {
       return json({ error: "signup_failed", detail: createErr?.message ?? "Could not create account" }, 400);
