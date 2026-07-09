@@ -265,8 +265,11 @@
         "notes": "Use a dumbbell or kettlebell (~20–24 kg). Reinforces squat pattern, adds quad volume, low axial load. Pause 1 second at the bottom.",
         "completed_sets": [
           true,
+          true,
           true
-        ]
+        ],
+        "logged_weight": 24,
+        "logged_weight_unit": "kg"
       },
       {
         "name": "Leg Curl (machine)",
