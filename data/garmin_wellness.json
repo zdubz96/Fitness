@@ -198,5 +198,15 @@
     "resting_hr": 51,
     "sleep_seconds": 23400,
     "steps": 6010
+  },
+  {
+    "awake_seconds": null,
+    "date": "2026-07-09",
+    "deep_sleep_seconds": null,
+    "light_sleep_seconds": null,
+    "rem_sleep_seconds": null,
+    "resting_hr": null,
+    "sleep_seconds": null,
+    "steps": null
   }
 ]
