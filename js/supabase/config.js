@@ -3,5 +3,5 @@
 // table. Fill these in from Supabase Dashboard -> Project Settings -> API before testing
 // anything under js/supabase/. This file is not imported by the live app (js/app.js) yet —
 // see docs/SUPABASE_SETUP.md for the cutover step.
-export const SUPABASE_URL = "REPLACE_WITH_YOUR_PROJECT_URL"; // e.g. https://xxxxx.supabase.co
-export const SUPABASE_ANON_KEY = "REPLACE_WITH_YOUR_ANON_KEY";
+export const SUPABASE_URL = "https://dekihivixqyoqxridlzr.supabase.co"; // e.g. https://xxxxx.supabase.co
+export const SUPABASE_ANON_KEY = "sb_publishable_bMJhW_uj_UZtSSb_oOikQQ_NJwkPYwy";

@@ -8,3 +8,4 @@ garth_session.json
 .DS_Store
 node_modules/
 *.log
+test.html
