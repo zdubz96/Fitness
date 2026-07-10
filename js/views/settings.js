@@ -5,6 +5,7 @@ import { cmToFtIn, ftInToCm } from "../lib/units.js";
 import { APP_VERSION } from "../version.js";
 import { supabase, getSession } from "../supabase/client.js";
 import { exportAllData, deleteAccount, signOut } from "../supabase/account.js";
+import { getIngestToken, regenerateIngestToken, clearIngestToken, ingestUrl } from "../supabase/garmin.js";
 
 function currentMonthKey() {
   const d = new Date();
@@ -32,6 +33,13 @@ export async function render(container) {
   const used = (usageRow?.input_tokens ?? 0) + (usageRow?.output_tokens ?? 0);
   const cap = settingsRow?.monthly_token_cap ?? 300000;
   const pct = Math.min(100, Math.round((used / cap) * 100));
+
+  let ingestToken = null;
+  try {
+    ingestToken = await getIngestToken();
+  } catch (e) {
+    console.warn("could not load Garmin ingest token", e);
+  }
 
   container.innerHTML = `
     <h1>Settings</h1>
@@ -78,8 +86,38 @@ export async function render(container) {
     </div>
 
     <div class="card stack">
-      <h2>Garmin</h2>
-      <p style="font-size:13px">Optional. Bring-your-own sync is coming soon — for now, log body weight and workouts manually in the Log tab.</p>
+      <h2>Garmin (optional)</h2>
+      <div class="row">
+        <span style="font-size:13px">Status</span>
+        <span class="badge ${ingestToken ? "green" : "unknown"}">${ingestToken ? "Token generated" : "Not set up"}</span>
+      </div>
+      <p style="font-size:13px;color:var(--text-dim)">
+        You run the sync yourself in your own GitHub Actions — this app never sees your Garmin
+        credentials. Generate a token below, then add two secrets to your fork/copy of this
+        repo's Actions settings.
+      </p>
+      ${ingestToken ? `
+        <label>Your ingest token</label>
+        <div class="row">
+          <input id="ingest-token-value" type="text" readonly value="${ingestToken}" style="font-family:monospace;font-size:12px" />
+          <button id="copy-token" class="secondary" style="white-space:nowrap">Copy</button>
+        </div>
+        <label>Ingest URL (repo secret <code>SUPABASE_INGEST_URL</code>)</label>
+        <div class="row">
+          <input id="ingest-url-value" type="text" readonly value="${ingestUrl()}" style="font-family:monospace;font-size:12px" />
+          <button id="copy-url" class="secondary" style="white-space:nowrap">Copy</button>
+        </div>
+        <p style="font-size:12px;color:var(--text-dim)">
+          In your repo: Settings → Secrets and variables → Actions → add
+          <code>GARMIN_INGEST_TOKEN</code> (the token above) and <code>SUPABASE_INGEST_URL</code>
+          (the URL above). The existing Garmin Sync workflow picks these up automatically —
+          see docs/SUPABASE_SETUP.md for the full walkthrough.
+        </p>
+        <button id="regen-token" class="secondary">Rotate token</button>
+        <button id="clear-token" class="ghost">Disconnect Garmin</button>
+      ` : `
+        <button id="gen-token">Generate ingest token</button>
+      `}
     </div>
 
     <p style="font-size:11px;color:var(--text-dim);margin:0;text-align:center">Build ${APP_VERSION}</p>
@@ -118,6 +156,57 @@ export async function render(container) {
       e.target.disabled = false;
       e.target.textContent = "Delete account";
     }
+  });
+
+  document.getElementById("gen-token")?.addEventListener("click", async (e) => {
+    e.target.disabled = true;
+    e.target.textContent = "Generating...";
+    try {
+      await regenerateIngestToken();
+      toast("Token generated", "success");
+      render(container);
+    } catch (err) {
+      toast(err.message, "error");
+      e.target.disabled = false;
+      e.target.textContent = "Generate ingest token";
+    }
+  });
+
+  document.getElementById("regen-token")?.addEventListener("click", async (e) => {
+    if (!confirm("Rotate your token? The old one stops working immediately — update it in your GitHub repo secrets too.")) return;
+    e.target.disabled = true;
+    try {
+      await regenerateIngestToken();
+      toast("Token rotated", "success");
+      render(container);
+    } catch (err) {
+      toast(err.message, "error");
+      e.target.disabled = false;
+    }
+  });
+
+  document.getElementById("clear-token")?.addEventListener("click", async (e) => {
+    if (!confirm("Disconnect Garmin? Your existing Garmin data stays, but syncing stops until you generate a new token.")) return;
+    e.target.disabled = true;
+    try {
+      await clearIngestToken();
+      toast("Disconnected", "success");
+      render(container);
+    } catch (err) {
+      toast(err.message, "error");
+      e.target.disabled = false;
+    }
+  });
+
+  document.getElementById("copy-token")?.addEventListener("click", () => {
+    document.getElementById("ingest-token-value").select();
+    navigator.clipboard.writeText(document.getElementById("ingest-token-value").value);
+    toast("Copied", "success");
+  });
+  document.getElementById("copy-url")?.addEventListener("click", () => {
+    document.getElementById("ingest-url-value").select();
+    navigator.clipboard.writeText(document.getElementById("ingest-url-value").value);
+    toast("Copied", "success");
   });
 
   const unitsSelect = document.getElementById("units");

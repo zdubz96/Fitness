@@ -136,6 +136,31 @@ branch**, test thoroughly, and only merge to `main` when you're confident:
    job, or delete the file) once you've moved to the optional BYO-Garmin path described in
    `ENGINEERING_REVIEW.md` §3.5.
 
+## Part 8 — Garmin power-up (optional, post-cutover)
+
+Garmin sync is optional and BYO: you keep running `scripts/garmin_sync.py` in this repo's own
+GitHub Actions (same cron as before), but it now also pushes into your Supabase rows instead
+of (well, in addition to) `data/*.json`. Your Garmin credentials never touch Supabase or leave
+this repo's Actions secrets.
+
+1. **Patch your database** (only needed once, even if you ran `schema.sql` before this feature
+   existed): SQL Editor → paste and run `supabase/migrations/0002_allow_ingest_token_update.sql`.
+2. **In the app**: Settings → **Garmin (optional)** → **Generate ingest token**. Copy the token
+   and the ingest URL shown.
+3. **In this GitHub repo**: Settings → Secrets and variables → Actions → add two new repository
+   secrets:
+   - `GARMIN_INGEST_TOKEN` — the token from step 2
+   - `SUPABASE_INGEST_URL` — the URL from step 2
+4. That's it — `.github/workflows/garmin-sync.yml` already reads both and will start pushing
+   into Supabase on its next scheduled run (or trigger it manually via Actions → Garmin Sync →
+   Run workflow).
+5. **Rotate or disconnect anytime** from the same Settings card — rotating immediately
+   invalidates the old token (update the GitHub secret to match), disconnecting just clears the
+   token without touching any Garmin data you've already synced.
+
+If you skip this entirely, the app works fully on manual logging + the check-in flow — Garmin
+was always meant to be additive, not required.
+
 ## Rollback
 
 Because the cutover is isolated to a few import-path changes in a branch, rolling back is

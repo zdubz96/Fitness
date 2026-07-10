@@ -1,2 +1,3 @@
 garth>=0.4.44
 garminconnect>=0.2.19
+requests>=2.31

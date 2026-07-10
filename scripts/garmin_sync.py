@@ -214,10 +214,42 @@ def merge_by_key(existing: list[dict], fresh: list[dict], key: str) -> list[dict
     return sorted(by_key.values(), key=lambda x: str(x.get("date") or x.get(key)))
 
 
+def post_to_supabase(activities: list[dict], wellness: list[dict], health: list[dict]) -> None:
+    """Optional: push the merged data to the garmin-ingest Supabase Edge Function so it lands
+    in this user's Supabase-backed rows (see supabase/functions/garmin-ingest/index.ts). This
+    is separate from and in addition to the local data/*.json write above — set both
+    SUPABASE_INGEST_URL and GARMIN_INGEST_TOKEN to enable it; leave them unset to keep the
+    script GitHub-only.
+    """
+    ingest_url = os.environ.get("SUPABASE_INGEST_URL")
+    ingest_token = os.environ.get("GARMIN_INGEST_TOKEN")
+    if not ingest_url or not ingest_token:
+        log("SUPABASE_INGEST_URL/GARMIN_INGEST_TOKEN not set, skipping Supabase sync")
+        return
+
+    import requests  # imported lazily so this dependency is only needed when actually used
+
+    payload = {"activities": activities, "wellness": wellness, "health": health}
+    try:
+        res = requests.post(
+            ingest_url,
+            headers={"X-Ingest-Token": ingest_token, "Content-Type": "application/json"},
+            json=payload,
+            timeout=30,
+        )
+        if not res.ok:
+            log(f"WARNING: Supabase ingest failed: {res.status_code} {res.text}")
+        else:
+            log(f"Supabase ingest ok: {res.json()}")
+    except Exception as e:  # noqa: BLE001 - never let a Supabase hiccup fail the whole sync
+        log(f"WARNING: Supabase ingest request failed: {e!r}")
+
+
 def main() -> None:
     client = authenticate()
 
     changed = False
+    merged_activities, merged_wellness, merged_health = [], [], []
 
     try:
         activities = fetch_activities(client)
@@ -228,6 +260,7 @@ def main() -> None:
             log(f"activities updated ({len(merged_activities)} total)")
     except (GarminConnectConnectionError, GarminConnectTooManyRequestsError) as e:
         log(f"WARNING: transient error fetching activities, skipping: {e!r}")
+        merged_activities = load_json(ACTIVITIES_FILE, [])
 
     try:
         wellness = fetch_wellness(client)
@@ -238,6 +271,7 @@ def main() -> None:
             log(f"wellness updated ({len(merged_wellness)} total)")
     except (GarminConnectConnectionError, GarminConnectTooManyRequestsError) as e:
         log(f"WARNING: transient error fetching wellness, skipping: {e!r}")
+        merged_wellness = load_json(WELLNESS_FILE, [])
 
     try:
         health = fetch_health(client)
@@ -248,6 +282,9 @@ def main() -> None:
             log(f"health updated ({len(merged_health)} total)")
     except (GarminConnectConnectionError, GarminConnectTooManyRequestsError) as e:
         log(f"WARNING: transient error fetching health data, skipping: {e!r}")
+        merged_health = load_json(HEALTH_FILE, [])
+
+    post_to_supabase(merged_activities, merged_wellness, merged_health)
 
     # Signal to the workflow whether there's anything to commit.
     gh_output = os.environ.get("GITHUB_OUTPUT")

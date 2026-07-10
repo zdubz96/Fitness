@@ -44,6 +44,11 @@ jobs:
           GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
           GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
           GARTH_HOME: ${{ github.workspace }}/.garth
+          # Optional: also push synced data into Supabase (see docs/SUPABASE_SETUP.md "Garmin
+          # power-up"). Leave these two repo secrets unset to skip Supabase entirely and only
+          # write data/*.json as before.
+          SUPABASE_INGEST_URL: ${{ secrets.SUPABASE_INGEST_URL }}
+          GARMIN_INGEST_TOKEN: ${{ secrets.GARMIN_INGEST_TOKEN }}
         run: python scripts/garmin_sync.py
 
       - name: Commit changes

@@ -218,5 +218,13 @@ create policy "own_usage_select" on usage for select using (user_id = auth.uid()
 drop policy if exists "own_settings_select" on user_settings;
 create policy "own_settings_select" on user_settings for select using (user_id = auth.uid());
 
+-- Users may generate/rotate their own Garmin ingest token, but nothing else on this row
+-- (monthly_token_cap stays admin-only) — combining a column-level GRANT with a row-level
+-- policy restricts writes to exactly that one column.
+grant update (garmin_ingest_token) on user_settings to authenticated;
+drop policy if exists "own_settings_update_ingest_token" on user_settings;
+create policy "own_settings_update_ingest_token" on user_settings
+  for update using (user_id = auth.uid()) with check (user_id = auth.uid());
+
 -- invite_codes: no client access at all (validated only inside the signup edge function
 -- via service_role, which bypasses RLS) — no policies needed since RLS defaults to deny-all.
