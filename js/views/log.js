@@ -11,11 +11,15 @@ function escapeHtml(str) {
   div.textContent = str ?? "";
   return div.innerHTML;
 }
+function formatDate(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
 
 export async function render(container) {
   let log = getLocal("exercise_log");
   let bodyMetrics = getLocal("body_metrics");
-  let pendingSets = []; // sets being built for the current entry before saving
+  let pendingSets = []; // sets being built for the current strength entry before saving
   const units = unitLabel();
 
   paint();
@@ -29,22 +33,36 @@ export async function render(container) {
   function recentExerciseNames() {
     const seen = [];
     for (let i = log.length - 1; i >= 0 && seen.length < 8; i--) {
-      const name = log[i].exercise;
-      if (name && !seen.includes(name)) seen.push(name);
+      const e = log[i];
+      if (e.type === "activity") continue;
+      if (e.exercise && !seen.includes(e.exercise)) seen.push(e.exercise);
+    }
+    return seen;
+  }
+
+  function recentActivityNames() {
+    const seen = [];
+    for (let i = log.length - 1; i >= 0 && seen.length < 8; i--) {
+      const e = log[i];
+      if (e.type !== "activity") continue;
+      if (e.exercise && !seen.includes(e.exercise)) seen.push(e.exercise);
     }
     return seen;
   }
 
   function paint() {
     const today = todayStr();
-    const todaysEntries = log.filter((e) => e.date === today).slice().reverse();
+    const recentEntries = log.slice().reverse().slice(0, 15);
     const recents = recentExerciseNames();
+    const recentActivities = recentActivityNames();
 
     container.innerHTML = `
       <h1>Log</h1>
 
       <div class="card stack">
         <h2>New entry</h2>
+        <label for="ex-date">Date</label>
+        <input id="ex-date" type="date" value="${today}" max="${today}" />
         <label for="ex-name">Exercise</label>
         <input id="ex-name" type="text" list="recent-exercises" placeholder="e.g. Bench Press" />
         <datalist id="recent-exercises">
@@ -79,6 +97,26 @@ export async function render(container) {
       </div>
 
       <div class="card stack">
+        <h2>Log an activity</h2>
+        <p style="font-size:13px;color:var(--text-dim)">For anything that isn't sets/reps — BJJ, a run, a hike, a pickup game.</p>
+        <label for="act-date">Date</label>
+        <input id="act-date" type="date" value="${today}" max="${today}" />
+        <label for="act-name">Activity</label>
+        <input id="act-name" type="text" list="recent-activities" placeholder="e.g. Brazilian Jiu-Jitsu" />
+        <datalist id="recent-activities">
+          ${recentActivities.map((n) => `<option value="${escapeHtml(n)}"></option>`).join("")}
+        </datalist>
+        ${recentActivities.length ? `<div class="row" style="flex-wrap:wrap;gap:6px">${recentActivities
+          .map((n) => `<button type="button" class="secondary shortcut-activity" style="min-height:36px;padding:6px 10px;font-size:13px" data-name="${escapeHtml(n)}">${escapeHtml(n)}</button>`)
+          .join("")}</div>` : ""}
+        <label for="act-duration">Duration (minutes)</label>
+        <input id="act-duration" type="number" inputmode="numeric" placeholder="60" />
+        <label for="act-note">Note (optional)</label>
+        <textarea id="act-note" placeholder="How did it feel?"></textarea>
+        <button id="save-activity">Save activity</button>
+      </div>
+
+      <div class="card stack">
         <h2>Body weight</h2>
         ${bodyMetrics.length ? `<p style="font-size:13px">Last: <strong>${displayWeight(latestWeight().weight, latestWeight().weight_unit)} ${units}</strong> on ${latestWeight().date}</p>` : `<p style="font-size:13px">No weigh-ins logged yet.</p>`}
         <div class="row">
@@ -88,8 +126,8 @@ export async function render(container) {
       </div>
 
       <div class="card">
-        <h2>Today's log</h2>
-        ${todaysEntries.length ? todaysEntries.map(renderEntry).join("") : `<p>Nothing logged yet today.</p>`}
+        <h2>Recent entries</h2>
+        ${recentEntries.length ? recentEntries.map(renderEntry).join("") : `<p>Nothing logged yet.</p>`}
       </div>
     `;
 
@@ -123,6 +161,11 @@ export async function render(container) {
         document.getElementById("ex-name").value = btn.dataset.name;
       });
     });
+    container.querySelectorAll(".shortcut-activity").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.getElementById("act-name").value = btn.dataset.name;
+      });
+    });
 
     document.getElementById("add-set").addEventListener("click", () => {
       const reps = Number(document.getElementById("set-reps").value);
@@ -137,14 +180,16 @@ export async function render(container) {
     });
 
     document.getElementById("save-entry").addEventListener("click", async () => {
+      const date = document.getElementById("ex-date").value || today;
       const name = document.getElementById("ex-name").value.trim();
       const note = document.getElementById("ex-note").value.trim();
       if (!name) return toast("Enter an exercise name", "error");
       if (!pendingSets.length) return toast("Add at least one set", "error");
       const entry = {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        date: today,
+        date,
         exercise: name,
+        type: "strength",
         sets: pendingSets,
         note: note || null,
         source: "manual",
@@ -155,6 +200,36 @@ export async function render(container) {
         await save("exercise_log", next, `log: ${name}`);
         log = next;
         pendingSets = [];
+        document.getElementById("ex-note").value = "";
+        toast("Logged", "success");
+        paint();
+      } catch (e) {
+        toast(e.message, "error");
+      }
+    });
+
+    document.getElementById("save-activity").addEventListener("click", async () => {
+      const date = document.getElementById("act-date").value || today;
+      const name = document.getElementById("act-name").value.trim();
+      const duration = Number(document.getElementById("act-duration").value);
+      const note = document.getElementById("act-note").value.trim();
+      if (!name) return toast("Enter an activity name", "error");
+      if (!duration) return toast("Enter a duration in minutes", "error");
+      const entry = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        date,
+        exercise: name,
+        type: "activity",
+        duration_minutes: duration,
+        sets: [],
+        note: note || null,
+        source: "manual",
+        created_at: new Date().toISOString(),
+      };
+      const next = [...log, entry];
+      try {
+        await save("exercise_log", next, `log: ${name}`);
+        log = next;
         toast("Logged", "success");
         paint();
       } catch (e) {
@@ -171,12 +246,19 @@ export async function render(container) {
   }
 
   function renderEntry(e) {
-    const setsText = e.sets
+    const dateLabel = e.date === todayStr() ? "Today" : formatDate(e.date);
+    if (e.type === "activity") {
+      return `<div class="checklist-item">
+        <div class="title">${escapeHtml(e.exercise)}</div>
+        <div class="meta">${dateLabel} · ${e.duration_minutes} min${e.note ? ` · ${escapeHtml(e.note)}` : ""}</div>
+      </div>`;
+    }
+    const setsText = (e.sets || [])
       .map((s) => `${s.reps}${s.weight ? `@${displayWeight(s.weight, s.weight_unit)}${units}` : ""}`)
       .join(", ");
     return `<div class="checklist-item">
       <div class="title">${escapeHtml(e.exercise)}</div>
-      <div class="meta">${setsText}${e.note ? ` · ${escapeHtml(e.note)}` : ""}</div>
+      <div class="meta">${dateLabel} · ${setsText}${e.note ? ` · ${escapeHtml(e.note)}` : ""}</div>
     </div>`;
   }
 }

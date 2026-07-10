@@ -42,8 +42,13 @@ export async function render(container) {
       .sort((a, b) => (a.date < b.date ? -1 : 1))
       .map((b) => ({ value: displayWeight(b.weight, b.weight_unit) }));
 
+    // Exclude duration-based activity entries (BJJ, runs, etc.) — they have no sets/reps and
+    // don't belong in a 1RM trend.
     const exerciseCounts = {};
-    log.forEach((e) => { exerciseCounts[e.exercise] = (exerciseCounts[e.exercise] || 0) + 1; });
+    log.forEach((e) => {
+      if (e.type === "activity") return;
+      exerciseCounts[e.exercise] = (exerciseCounts[e.exercise] || 0) + 1;
+    });
     const topExercises = Object.entries(exerciseCounts).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name]) => name);
 
     const cardioSeries = weekBuckets(activities, (a) => a.date, (a) => (a.duration_seconds || 0) / 60);
