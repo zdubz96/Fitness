@@ -301,8 +301,13 @@
       }
     ],
     "rationale": "Consolidates the missed Monday lower session into Thursday's planned slot — fresh after a full rest day, with the squat at the Week 1 baseline weight and posterior-chain accessories kept as hip-hinge variations to comply with the squat+deadlift separation rule.",
-    "status": "planned",
-    "generated_at": "2026-07-06T20:30:36.823Z"
+    "status": "completed",
+    "generated_at": "2026-07-06T20:30:36.823Z",
+    "feedback": {
+      "difficulty": "right",
+      "note": null,
+      "at": "2026-07-10T00:10:41.616Z"
+    }
   },
   {
     "date": "2026-07-10",
