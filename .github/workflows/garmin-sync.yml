@@ -2,7 +2,10 @@ name: Garmin Sync
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    # Every 4 hours. Daily wellness/sleep/HRV only update a few times a day and activities
+    # sync whenever you finish one, so 30-min polling was overkill and multiplied the fresh-
+    # login / 429 rate-limit risk on shared GitHub IPs. 6 runs/day is plenty.
+    - cron: "0 */4 * * *"
   workflow_dispatch: {}
 
 permissions:
@@ -27,14 +30,15 @@ jobs:
       - name: Install dependencies
         run: pip install -r scripts/requirements.txt
 
-      # Persists the garth session between runs so we don't trigger a fresh login
-      # (and its rate-limit / MFA risk) every 30 minutes. Keyed by day so it still
-      # rotates periodically; falls back to the most recent cache on miss.
+      # Persist the garth session between runs so we avoid a fresh login (and its rate-limit /
+      # MFA risk) on every run. Restore the most recent session by prefix; the save step below
+      # runs ONLY when the sync confirmed a valid session, so a rate-limited or failed run can
+      # never poison the cache with a partial/cleared .garth dir.
       - name: Restore garth session
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: .garth
-          key: garth-session-${{ github.run_id }}
+          key: garth-session-none  # intentionally never an exact hit -> always use restore-keys
           restore-keys: |
             garth-session-
 
@@ -49,7 +53,17 @@ jobs:
           # write data/*.json as before.
           SUPABASE_INGEST_URL: ${{ secrets.SUPABASE_INGEST_URL }}
           GARMIN_INGEST_TOKEN: ${{ secrets.GARMIN_INGEST_TOKEN }}
+          # Manual runs do the wide 14-day catch-up sweep; scheduled runs stay lean (3 days).
+          FULL_BACKFILL: ${{ github.event_name == 'workflow_dispatch' }}
         run: python scripts/garmin_sync.py
+
+      # Only cache the session when the sync confirmed a valid one — never a partial/cleared dir.
+      - name: Save garth session
+        if: steps.sync.outputs.session_saved == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .garth
+          key: garth-session-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Commit changes
         if: steps.sync.outputs.changed == 'true'

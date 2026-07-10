@@ -14,6 +14,7 @@ import json
 import os
 import shutil
 import sys
+import time
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -52,8 +53,14 @@ from garminconnect import (
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = REPO_ROOT / "data"
 SESSION_DIR = Path(os.environ.get("GARTH_HOME", str(REPO_ROOT / ".garth")))
-ACTIVITIES_LOOKBACK_DAYS = int(os.environ.get("ACTIVITIES_LOOKBACK_DAYS", "14"))
-WELLNESS_LOOKBACK_DAYS = int(os.environ.get("WELLNESS_LOOKBACK_DAYS", "14"))
+
+# Fewer days per run = far fewer Garmin API calls = much lower rate-limit (429) risk. Old data
+# is preserved either way: data/*.json is merged by key, and the Supabase push sends the full
+# merged history. A manual run (FULL_BACKFILL=true) does the wide 14-day sweep to catch up.
+FULL_BACKFILL = os.environ.get("FULL_BACKFILL", "").lower() == "true"
+_default_lookback = "14" if FULL_BACKFILL else "3"
+ACTIVITIES_LOOKBACK_DAYS = int(os.environ.get("ACTIVITIES_LOOKBACK_DAYS", _default_lookback))
+WELLNESS_LOOKBACK_DAYS = int(os.environ.get("WELLNESS_LOOKBACK_DAYS", _default_lookback))
 
 ACTIVITIES_FILE = DATA_DIR / "garmin_activities.json"
 WELLNESS_FILE = DATA_DIR / "garmin_wellness.json"
@@ -105,19 +112,43 @@ def authenticate() -> Garmin:
         except Exception as e:  # noqa: BLE001 - any resume failure -> fresh login
             log(f"session resume failed ({e!r}), falling back to fresh login")
 
-    try:
-        client.login()
-    except GarminConnectAuthenticationError as e:
-        log(f"FATAL: authentication failed: {e}")
-        sys.exit(1)
-    except GarthException as e:
-        log(f"FATAL: garth auth error (possibly MFA required, unsupported in CI): {e}")
-        sys.exit(1)
+    _login_with_backoff(client)
 
     SESSION_DIR.mkdir(parents=True, exist_ok=True)
     garth.save(str(SESSION_DIR))
     log("fresh login succeeded, session saved")
     return client
+
+
+def _is_rate_limit(err: Exception) -> bool:
+    return "429" in str(err) or "rate limit" in str(err).lower()
+
+
+def _login_with_backoff(client: Garmin, max_attempts: int = 3) -> None:
+    """Fresh login with exponential backoff on Garmin's 429 rate limiting.
+
+    Garmin rate-limits shared CI IPs aggressively. Rather than hammering (which risks a
+    longer lockout) or failing the whole run, we back off and retry; if still limited after
+    a few tries we exit 0 (transient — the next scheduled run will try again) rather than
+    exit 1 (which would mark the workflow failed and is reserved for real auth errors).
+    """
+    for attempt in range(1, max_attempts + 1):
+        try:
+            client.login()
+            return
+        except GarminConnectAuthenticationError as e:
+            log(f"FATAL: authentication failed: {e}")
+            sys.exit(1)
+        except (GarminConnectTooManyRequestsError, GarthException) as e:
+            if not _is_rate_limit(e):
+                log(f"FATAL: garth auth error (possibly MFA required, unsupported in CI): {e}")
+                sys.exit(1)
+            if attempt == max_attempts:
+                log(f"rate-limited by Garmin after {max_attempts} attempts; giving up until next run")
+                sys.exit(0)  # transient — don't fail the workflow
+            wait = 60 * attempt
+            log(f"login rate-limited (429), attempt {attempt}/{max_attempts}, backing off {wait}s")
+            time.sleep(wait)
 
 
 def fetch_activities(client: Garmin) -> list[dict]:
@@ -247,6 +278,14 @@ def post_to_supabase(activities: list[dict], wellness: list[dict], health: list[
 
 def main() -> None:
     client = authenticate()
+
+    # We have a valid session at this point (authenticate() exits before here otherwise). Signal
+    # the workflow that it's safe to cache .garth — we only want to persist confirmed-good
+    # sessions, never a partial/cleared dir from a rate-limited or failed run.
+    gh_output = os.environ.get("GITHUB_OUTPUT")
+    if gh_output:
+        with open(gh_output, "a", encoding="utf-8") as f:
+            f.write("session_saved=true\n")
 
     changed = False
     merged_activities, merged_wellness, merged_health = [], [], []
