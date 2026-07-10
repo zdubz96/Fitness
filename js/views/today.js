@@ -14,6 +14,7 @@ import {
   todayStr,
 } from "../lib/program.js";
 import { needsCheckinToday, logWellnessCheckin, computeManualRecoverySignal } from "../lib/wellness_checkin.js";
+import { exerciseVideoUrl } from "../lib/video.js";
 
 const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -243,12 +244,8 @@ export async function render(container) {
     const rationale = day.rationale ? `<p style="font-style:italic;margin-top:8px">"${escapeHtml(day.rationale)}"</p>` : "";
     const units = unitLabel();
 
-    const warmupHtml = day.warmup
-      ? `<div class="checklist-item" style="background:var(--bg-elev)"><div class="title">🔥 Warm-up${day.warmup_min ? ` · ${day.warmup_min}m` : ""}</div><div class="meta">${escapeHtml(day.warmup)}</div></div>`
-      : "";
-    const cooldownHtml = day.cooldown
-      ? `<div class="checklist-item" style="background:var(--bg-elev)"><div class="title">🧊 Cool-down${day.cooldown_min ? ` · ${day.cooldown_min}m` : ""}</div><div class="meta">${escapeHtml(day.cooldown)}</div></div>`
-      : "";
+    const warmupHtml = renderMovementBlock("🔥 Warm-up", day.warmup, day.warmup_min);
+    const cooldownHtml = renderMovementBlock("🧊 Cool-down", day.cooldown, day.cooldown_min);
 
     const exercises = day.exercises
       .map((ex, exIdx) => {
@@ -278,7 +275,7 @@ export async function render(container) {
           : "";
 
         return `<div class="checklist-item ${allDone ? "done" : ""}" data-exercise-idx="${exIdx}" data-exercise-name="${escapeHtml(ex.name)}">
-          <div class="title">${escapeHtml(ex.name)}</div>
+          <div class="row"><div class="title">${escapeHtml(ex.name)}</div>${formLink(ex.name)}</div>
           <div class="meta">${ex.sets}x${escapeHtml(String(ex.reps))} · rest ${ex.rest_seconds}s${ex.notes ? ` · ${escapeHtml(ex.notes)}` : ""}</div>
           <div style="margin-top:6px">${setsHtml}</div>
           ${weightHtml}
@@ -294,6 +291,40 @@ export async function render(container) {
     ${day.feedback ? `<p style="margin-top:10px;font-size:13px">Feedback: <strong>${escapeHtml(day.feedback.difficulty)}</strong>${day.feedback.note ? ` — ${escapeHtml(day.feedback.note)}` : ""}</p>` : ""}`;
 
     return `${header}${rationale}${warmupHtml}${exercises}${cooldownHtml}${actions}`;
+  }
+
+  // Small "▶ form" link that opens a YouTube form-tutorial search for the movement.
+  function formLink(name) {
+    const url = exerciseVideoUrl(name);
+    if (!url) return "";
+    return `<a href="${url}" target="_blank" rel="noopener" style="font-size:12px;white-space:nowrap;flex:0 0 auto">▶ form</a>`;
+  }
+
+  // Renders a warm-up or cool-down as a titled block of individual movement line items, each
+  // with its own form link. `movements` is an array of {name, detail}.
+  function renderMovementBlock(title, movements, minutes) {
+    // Legacy programs stored warm-up/cool-down as a single free-text string — show it as-is so
+    // it doesn't disappear before the next regenerate.
+    if (typeof movements === "string") {
+      if (!movements.trim()) return "";
+      return `<div class="checklist-item" style="background:var(--bg-elev)">
+        <div class="title">${title}${minutes ? ` · ${minutes}m` : ""}</div>
+        <div class="meta">${escapeHtml(movements)}</div>
+      </div>`;
+    }
+    if (!Array.isArray(movements) || !movements.length) return "";
+    const items = movements
+      .map(
+        (m) => `<div class="row" style="padding:3px 0;font-size:14px">
+          <span>${escapeHtml(m.name)}${m.detail ? ` <span style="color:var(--text-dim)">· ${escapeHtml(m.detail)}</span>` : ""}</span>
+          ${formLink(m.name)}
+        </div>`
+      )
+      .join("");
+    return `<div class="checklist-item" style="background:var(--bg-elev)">
+      <div class="title">${title}${minutes ? ` · ${minutes}m` : ""}</div>
+      <div style="margin-top:4px">${items}</div>
+    </div>`;
   }
 
   function lastLoggedWeight(name) {

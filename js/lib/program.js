@@ -23,10 +23,14 @@ const DAY_SCHEMA = `{
   "focus": string,           // short, e.g. "Lower strength", "Zone 2 cardio", "Rest"
   "is_rest_day": boolean,
   "duration_min": number,    // estimated TOTAL minutes incl. warm-up + cool-down (0 for rest days)
-  "warmup": string,          // specific warm-up for this session ("" for rest days)
-  "warmup_min": number,      // minutes (0 for rest days)
-  "cooldown": string,        // specific cool-down for this session ("" for rest days)
-  "cooldown_min": number,    // minutes (0 for rest days)
+  "warmup": [                // individual warm-up movements ([] for rest days)
+    { "name": string, "detail": string }   // name is a specific named movement (e.g. "Leg swings"); detail = duration/reps (e.g. "10 each leg")
+  ],
+  "warmup_min": number,      // total warm-up minutes (0 for rest days)
+  "cooldown": [              // individual cool-down movements ([] for rest days)
+    { "name": string, "detail": string }
+  ],
+  "cooldown_min": number,    // total cool-down minutes (0 for rest days)
   "exercises": [             // empty for rest days; at most 6 for training days
     { "name": string, "sets": number, "reps": string, "rest_seconds": number, "rpe_target": number, "notes": string }
   ],
@@ -43,8 +47,10 @@ starting loads to it), recovery indicators, recent Garmin data and logs.
 Rules:
 - Return EXACTLY 7 day objects, day_offset 0 through 6, in order.
 - Honor their schedule: include rest days so training days match how many days/week they can train.
-- Every training day MUST include a specific warm-up and cool-down with durations; the total
-  (warm-up + work + cool-down) must fit ~60 minutes.
+- Every training day MUST include a warm-up and cool-down, EACH broken into a list of specific,
+  individually-named movements (not one paragraph) — e.g. warmup: [{"name":"Leg swings","detail":"10 each leg"},
+  {"name":"Bodyweight squats","detail":"2x10"}]. Each movement must be a real, searchable exercise
+  name so the client can look up its form. The total (warm-up + work + cool-down) must fit ~60 minutes.
 - Balance strength with structured cardio when they have a cardiovascular goal (Zone 2 base volume
   plus some interval work — the two levers for VO2 max), and avoid burying everything in the
   moderate "gray zone".
@@ -95,6 +101,23 @@ export function programDays() {
     .sort((a, b) => (a.date < b.date ? -1 : 1));
 }
 
+/**
+ * Coerce a warm-up/cool-down field into an array of {name, detail} movement items. Accepts the
+ * new array shape from the coach, and also tolerates a legacy free-text string (from programs
+ * generated before warm-ups were broken into line items) by wrapping it as a single item.
+ */
+function normalizeMovements(value) {
+  if (Array.isArray(value)) {
+    return value
+      .map((m) => (typeof m === "string" ? { name: m, detail: "" } : { name: m?.name || "", detail: m?.detail || "" }))
+      .filter((m) => m.name);
+  }
+  if (typeof value === "string" && value.trim()) {
+    return [{ name: value.trim(), detail: "" }];
+  }
+  return [];
+}
+
 function toWorkoutEntry(programId, startDate, day) {
   const date = addDays(startDate, day.day_offset);
   return {
@@ -104,9 +127,9 @@ function toWorkoutEntry(programId, startDate, day) {
     focus: day.focus || (day.is_rest_day ? "Rest" : "Training"),
     is_rest_day: !!day.is_rest_day,
     duration_min: day.duration_min || null,
-    warmup: day.warmup || "",
+    warmup: normalizeMovements(day.warmup),
     warmup_min: day.warmup_min || null,
-    cooldown: day.cooldown || "",
+    cooldown: normalizeMovements(day.cooldown),
     cooldown_min: day.cooldown_min || null,
     exercises: (day.exercises || []).map((e) => ({ ...e, completed_sets: [] })),
     rationale: day.rationale || "",
