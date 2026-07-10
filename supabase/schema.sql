@@ -139,10 +139,14 @@ create table if not exists user_settings (
 -- ============================================================================
 -- 11. invite_codes — registration gate
 -- ============================================================================
+-- created_by/used_by use ON DELETE SET NULL (not the default NO ACTION): without this,
+-- Postgres blocks deleting ANY user who has ever redeemed an invite code — i.e. every user —
+-- because the FK would be left dangling. SET NULL keeps the invite_codes row (and its
+-- uses/max_uses accounting) intact while just clearing the reference to the deleted user.
 create table if not exists invite_codes (
   code text primary key,
-  created_by uuid references auth.users(id),
-  used_by uuid references auth.users(id),
+  created_by uuid references auth.users(id) on delete set null,
+  used_by uuid references auth.users(id) on delete set null,
   used_at timestamptz,
   max_uses int not null default 1,
   uses int not null default 0,
