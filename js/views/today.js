@@ -24,6 +24,10 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+function daysAgoStr(dateStr) {
+  return Math.floor((Date.now() - new Date(dateStr + "T00:00:00").getTime()) / 86400000);
+}
+
 function dowLabel(dateStr) {
   return DOW[new Date(dateStr + "T00:00:00").getDay()];
 }
@@ -66,7 +70,12 @@ export async function render(container) {
       if (manual.level !== "unknown") recovery = manual;
     }
     const today = todayStr();
-    const todaysWellness = wellness.find((w) => w.date === today) || {};
+    // Use the most recent wellness entry within the last 2 days rather than requiring an exact
+    // match on today's date: the Garmin sync runs on GitHub Actions (UTC), while "today" here is
+    // the browser's local date — those two can legitimately differ for hours around midnight in
+    // either direction, which would otherwise show empty tiles despite real recent data existing.
+    const latestWellness = [...wellness].sort((a, b) => (a.date < b.date ? -1 : 1)).pop();
+    const todaysWellness = latestWellness && daysAgoStr(latestWellness.date) <= 1 ? latestWellness : {};
     const recent7Load = activities.slice(-7).reduce((s, a) => s + (effectiveLoad(a) || 0), 0);
 
     const showReviewBanner = needsWeeklyReview(reviews);
