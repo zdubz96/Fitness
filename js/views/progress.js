@@ -40,7 +40,7 @@ export async function render(container) {
     const bodyWeightSeries = bodyMetrics
       .slice()
       .sort((a, b) => (a.date < b.date ? -1 : 1))
-      .map((b) => ({ value: displayWeight(b.weight, b.weight_unit) }));
+      .map((b) => ({ date: b.date, value: displayWeight(b.weight, b.weight_unit) }));
 
     // Exclude duration-based activity entries (BJJ, runs, etc.) — they have no sets/reps and
     // don't belong in a 1RM trend.
@@ -55,7 +55,7 @@ export async function render(container) {
     const rhrSeries = wellness
       .filter((w) => daysAgo(w.date) < 90)
       .sort((a, b) => (a.date < b.date ? -1 : 1))
-      .map((w) => ({ value: w.resting_hr }));
+      .map((w) => ({ date: w.date, value: w.resting_hr }));
 
     container.innerHTML = `
       <h1>Progress</h1>
@@ -149,7 +149,7 @@ export async function render(container) {
       .sort((a, b) => (a.date < b.date ? -1 : 1));
     const series = entries.map((e) => {
       const best = Math.max(...e.sets.map((s) => epley1RM(displayWeight(s.weight, s.weight_unit), s.reps) || 0));
-      return { value: best || null };
+      return { date: e.date, value: best || null };
     });
     const latest = [...series].reverse().find((p) => p.value)?.value;
     return `<div style="margin-bottom:14px">
@@ -194,5 +194,12 @@ function weekBuckets(rows, dateFn, valueFn) {
     const weekIdx = Math.floor(d / 7);
     buckets[weekIdx] = (buckets[weekIdx] || 0) + valueFn(r);
   });
-  return Array.from({ length: 12 }, (_, i) => ({ value: buckets[11 - i] || 0 }));
+  const today = new Date();
+  return Array.from({ length: 12 }, (_, i) => {
+    const weeksAgo = 11 - i;
+    const d = new Date(today);
+    d.setDate(d.getDate() - weeksAgo * 7);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    return { date: dateStr, value: buckets[weeksAgo] || 0 };
+  });
 }
