@@ -246,5 +246,12 @@
     "hrv_status": null,
     "intensity_minutes_moderate": null,
     "intensity_minutes_vigorous": null
+  },
+  {
+    "date": "2026-07-24",
+    "hrv_avg_ms": null,
+    "hrv_status": null,
+    "intensity_minutes_moderate": null,
+    "intensity_minutes_vigorous": null
   }
 ]
