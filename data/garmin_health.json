@@ -305,9 +305,12 @@
   },
   {
     "date": "2026-08-01",
+    "fitness_age": null,
     "hrv_avg_ms": null,
     "hrv_status": null,
     "intensity_minutes_moderate": null,
-    "intensity_minutes_vigorous": null
+    "intensity_minutes_vigorous": null,
+    "vo2max_cycling": null,
+    "vo2max_running": 42.0
   }
 ]

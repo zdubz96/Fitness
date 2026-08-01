@@ -68,5 +68,33 @@
     "name": "Whatcom County Walking",
     "training_load": null,
     "type": "walking"
+  },
+  {
+    "aerobic_effect": null,
+    "anaerobic_effect": null,
+    "avg_hr": 135.0,
+    "calories": 58.0,
+    "date": "2026-07-29",
+    "distance_meters": 918.0700073242188,
+    "duration_seconds": 464.02398681640625,
+    "id": 23812303274,
+    "max_hr": 161.0,
+    "name": "Running",
+    "training_load": null,
+    "type": "running"
+  },
+  {
+    "aerobic_effect": null,
+    "anaerobic_effect": null,
+    "avg_hr": 158.0,
+    "calories": 427.0,
+    "date": "2026-08-01",
+    "distance_meters": 5796.490234375,
+    "duration_seconds": 3217.925048828125,
+    "id": 23812304078,
+    "max_hr": 188.0,
+    "name": "Philadelphia Running",
+    "training_load": null,
+    "type": "running"
   }
 ]

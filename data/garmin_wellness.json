@@ -435,8 +435,8 @@
     "deep_sleep_seconds": null,
     "light_sleep_seconds": null,
     "rem_sleep_seconds": null,
-    "resting_hr": null,
+    "resting_hr": 58,
     "sleep_seconds": null,
-    "steps": null
+    "steps": 12509
   }
 ]
