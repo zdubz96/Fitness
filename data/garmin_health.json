@@ -312,5 +312,12 @@
     "intensity_minutes_vigorous": null,
     "vo2max_cycling": null,
     "vo2max_running": 42.0
+  },
+  {
+    "date": "2026-08-02",
+    "hrv_avg_ms": null,
+    "hrv_status": null,
+    "intensity_minutes_moderate": null,
+    "intensity_minutes_vigorous": null
   }
 ]
