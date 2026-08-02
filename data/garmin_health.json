@@ -316,7 +316,7 @@
   {
     "date": "2026-08-02",
     "hrv_avg_ms": null,
-    "hrv_status": null,
+    "hrv_status": "LOW",
     "intensity_minutes_moderate": null,
     "intensity_minutes_vigorous": null
   }
