@@ -50,6 +50,40 @@ export function buildCoachContext() {
   };
 }
 
+const CHAT_SUMMARY_MAX_CHARS = 1200;
+
+/**
+ * A version of the profile trimmed for prompt inclusion only (never persisted). Two fields
+ * grow without bound the longer someone uses the app — chat_summary (appended to every time
+ * old coach chat gets summarized) and cardio_reports (one full quarterly report added every
+ * quarter) — and both were being sent in full, pretty-printed, on every single coach call.
+ * That's pure token/latency waste: the coach needs recent context, not the full archive.
+ */
+function trimProfileForPrompt(profile) {
+  const trimmed = { ...profile };
+  if (typeof trimmed.chat_summary === "string" && trimmed.chat_summary.length > CHAT_SUMMARY_MAX_CHARS) {
+    trimmed.chat_summary = `...${trimmed.chat_summary.slice(-CHAT_SUMMARY_MAX_CHARS)}`;
+  }
+  if (Array.isArray(trimmed.cardio_reports) && trimmed.cardio_reports.length) {
+    trimmed.cardio_reports = [trimmed.cardio_reports[trimmed.cardio_reports.length - 1]];
+  }
+  return trimmed;
+}
+
+/** Drop fields the coach doesn't need from a Garmin/log row, keeping only what's referenced elsewhere in this app's prompts. */
+function slimActivity(a) {
+  const { id, type, date, name, duration_seconds, distance_meters, avg_hr, max_hr, calories, training_load } = a;
+  return { id, type, date, name, duration_seconds, distance_meters, avg_hr, max_hr, calories, training_load };
+}
+function slimWellness(w) {
+  const { date, resting_hr, sleep_seconds, steps } = w;
+  return { date, resting_hr, sleep_seconds, steps };
+}
+function slimHealth(h) {
+  const { date, vo2max_running, vo2max_cycling, hrv_avg_ms, hrv_status, intensity_minutes_moderate, intensity_minutes_vigorous } = h;
+  return { date, vo2max_running, vo2max_cycling, hrv_avg_ms, hrv_status, intensity_minutes_moderate, intensity_minutes_vigorous };
+}
+
 /** Renders the context bundle into a compact text block for a Claude system prompt. */
 export function contextToPromptText(ctx) {
   return `
@@ -58,10 +92,10 @@ UNITS: all weights are in ${ctx.units}. Use ${ctx.units} in any prescriptions or
 ${ctx.latestBodyWeight ? `CURRENT BODY WEIGHT: ${ctx.latestBodyWeight.weight} ${ctx.latestBodyWeight.weight_unit || ctx.units} (logged ${ctx.latestBodyWeight.date})` : ""}
 
 TRAINER PROFILE:
-${JSON.stringify(ctx.profile, null, 2)}
+${JSON.stringify(trimProfileForPrompt(ctx.profile))}
 
 GOALS:
-${JSON.stringify(ctx.goals, null, 2)}
+${JSON.stringify(ctx.goals)}
 
 RECOVERY INDICATORS (computed locally, trust these numbers):
 level: ${ctx.recovery.level}
@@ -70,13 +104,13 @@ metrics: ${JSON.stringify(ctx.recovery.metrics)}
 
 LAST 14 DAYS OF GARMIN ACTIVITIES (includes BOTH planned sessions and any unplanned efforts like
 hikes — treat every one as real training stress and reconcile the plan against what actually happened):
-${JSON.stringify(ctx.last14Activities)}
+${JSON.stringify(ctx.last14Activities.map(slimActivity))}
 
 LAST 14 DAYS OF WELLNESS (sleep, resting HR, steps):
-${JSON.stringify(ctx.last14Wellness)}
+${JSON.stringify(ctx.last14Wellness.map(slimWellness))}
 
 LAST 14 DAYS OF HEALTH (VO2 max, HRV, intensity minutes):
-${JSON.stringify(ctx.last14Health)}
+${JSON.stringify(ctx.last14Health.map(slimHealth))}
 
 LAST 14 DAYS OF LOGGED EXERCISES:
 ${JSON.stringify(ctx.last14Logs)}
