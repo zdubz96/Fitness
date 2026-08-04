@@ -161,6 +161,35 @@ this repo's Actions secrets.
 If you skip this entirely, the app works fully on manual logging + the check-in flow — Garmin
 was always meant to be additive, not required.
 
+## Part 9 — Weekly program auto-regenerate (optional)
+
+A GitHub Actions cron (Sunday 06:00 UTC) calls the `weekly-program-cron` Edge Function, which
+regenerates the coming week's program for every user who's opted in — server-side, no browser
+needed. It skips anyone who already has an active program covering the new week, so it never
+overwrites a program you (or a friend) already generated or hand-tweaked.
+
+1. **Deploy the function**: same as Part 2 — Dashboard → Edge Functions → Deploy a new function
+   → name it exactly `weekly-program-cron` → paste `supabase/functions/weekly-program-cron/index.ts`.
+2. **Disable JWT verification for it** (Settings tab on the function) — it's called by GitHub
+   Actions with no signed-in user, same as `signup`/`garmin-ingest`.
+3. **Pick a random secret string** (anything long and unguessable — e.g. generate one with
+   `openssl rand -hex 32` or any password generator) and set it in **two** places, using the
+   exact same value in both:
+   - Supabase → Edge Functions → Manage secrets → add `CRON_SECRET`
+   - This GitHub repo → Settings → Secrets and variables → Actions → add `CRON_SECRET`
+4. **Add one more repo secret**: `SUPABASE_PROJECT_URL` = your Project URL (same value as in
+   `js/supabase/config.js`, e.g. `https://xxxxx.supabase.co`).
+5. **Patch the database**: SQL Editor → run `supabase/migrations/0003_add_auto_regenerate_program.sql`
+   (one-time; adds the opt-in column).
+6. Done — the workflow (`.github/workflows/weekly-program.yml`) is already in this repo. Anyone
+   who wants it turns it on themselves: Settings → "Weekly program" card → check
+   **"Auto-regenerate my program every Sunday"**. Off by default for everyone, so nobody gets
+   surprise weekly token usage without choosing it.
+
+Test it anytime without waiting for Sunday: GitHub → Actions → **Weekly Program Auto-Regenerate**
+→ **Run workflow**. Check the run's log for a JSON summary of who was processed and why (skipped
+for an active program, skipped for quota, generated, or errored).
+
 ## Rollback
 
 Because the cutover is isolated to a few import-path changes in a branch, rolling back is

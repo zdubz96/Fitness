@@ -133,7 +133,8 @@ create table if not exists usage (
 create table if not exists user_settings (
   user_id uuid primary key references auth.users(id) on delete cascade,
   monthly_token_cap bigint not null default 300000,
-  garmin_ingest_token text
+  garmin_ingest_token text,
+  auto_regenerate_program boolean not null default false
 );
 
 -- ============================================================================
@@ -224,6 +225,12 @@ create policy "own_settings_select" on user_settings for select using (user_id =
 grant update (garmin_ingest_token) on user_settings to authenticated;
 drop policy if exists "own_settings_update_ingest_token" on user_settings;
 create policy "own_settings_update_ingest_token" on user_settings
+  for update using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- Same pattern for the auto-regenerate-program opt-in toggle.
+grant update (auto_regenerate_program) on user_settings to authenticated;
+drop policy if exists "own_settings_update_auto_regen" on user_settings;
+create policy "own_settings_update_auto_regen" on user_settings
   for update using (user_id = auth.uid()) with check (user_id = auth.uid());
 
 -- invite_codes: no client access at all (validated only inside the signup edge function

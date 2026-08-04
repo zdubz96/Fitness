@@ -28,11 +28,12 @@ export async function render(container) {
   const month = currentMonthKey();
   const [{ data: usageRow }, { data: settingsRow }] = await Promise.all([
     supabase.from("usage").select("input_tokens, output_tokens").eq("user_id", session.user.id).eq("month", month).maybeSingle(),
-    supabase.from("user_settings").select("monthly_token_cap").eq("user_id", session.user.id).maybeSingle(),
+    supabase.from("user_settings").select("monthly_token_cap, auto_regenerate_program").eq("user_id", session.user.id).maybeSingle(),
   ]);
   const used = (usageRow?.input_tokens ?? 0) + (usageRow?.output_tokens ?? 0);
   const cap = settingsRow?.monthly_token_cap ?? 300000;
   const pct = Math.min(100, Math.round((used / cap) * 100));
+  const autoRegenerate = settingsRow?.auto_regenerate_program ?? false;
 
   let ingestToken = null;
   try {
@@ -83,6 +84,19 @@ export async function render(container) {
       <input id="max-hr" type="number" value="${maxHR}" />
       <div id="zone-preview"></div>
       <button id="save-zones" class="secondary">Save zones</button>
+    </div>
+
+    <div class="card stack">
+      <h2>Weekly program</h2>
+      <label style="display:flex;align-items:center;gap:10px;margin:0">
+        <input id="auto-regen" type="checkbox" ${autoRegenerate ? "checked" : ""} style="width:20px;height:20px" />
+        <span>Auto-regenerate my program every Sunday</span>
+      </label>
+      <p style="font-size:12px;color:var(--text-dim);margin:0">
+        Runs automatically at 6am UTC Sunday — no need to open the app or tap Regenerate. Only
+        generates a fresh week if you don't already have an active program covering it, so it
+        never overwrites something you generated or tweaked yourself. Uses your coach token budget.
+      </p>
     </div>
 
     <div class="card stack">
@@ -155,6 +169,18 @@ export async function render(container) {
       toast(err.message, "error");
       e.target.disabled = false;
       e.target.textContent = "Delete account";
+    }
+  });
+
+  document.getElementById("auto-regen").addEventListener("change", async (e) => {
+    const checked = e.target.checked;
+    try {
+      const { error } = await supabase.from("user_settings").update({ auto_regenerate_program: checked }).eq("user_id", session.user.id);
+      if (error) throw error;
+      toast(checked ? "Auto-regenerate enabled" : "Auto-regenerate disabled", "success");
+    } catch (err) {
+      e.target.checked = !checked; // revert on failure
+      toast(err.message, "error");
     }
   });
 
