@@ -62,24 +62,31 @@ async function currentUserId() {
 
 // ---- per-table row <-> app-shape mapping ----
 
+// orderBy defaults to "created_at" (present on workouts/exercise_logs/goals/weekly_reviews/
+// body_metrics). The garmin_* tables have no created_at column at all (they're plain mirrors
+// keyed by date), and coach_chats uses "at" instead — those must override it, or the ordered
+// select 400s with a Postgres "column does not exist" error and refresh() silently fails.
 const ADAPTERS = {
   garmin_activities: {
     table: "garmin_activities",
     toRows: (uid, arr) => arr.map((a) => ({ user_id: uid, activity_id: a.id, date: a.date, data: a })),
     fromRows: (rows) => rows.map((r) => r.data),
     conflict: "user_id,activity_id",
+    orderBy: "date",
   },
   garmin_wellness: {
     table: "garmin_wellness",
     toRows: (uid, arr) => arr.map((w) => ({ user_id: uid, date: w.date, data: w })),
     fromRows: (rows) => rows.map((r) => r.data),
     conflict: "user_id,date",
+    orderBy: "date",
   },
   garmin_health: {
     table: "garmin_health",
     toRows: (uid, arr) => arr.map((h) => ({ user_id: uid, date: h.date, data: h })),
     fromRows: (rows) => rows.map((r) => r.data),
     conflict: "user_id,date",
+    orderBy: "date",
   },
   workouts: {
     table: "workouts",
@@ -105,6 +112,7 @@ const ADAPTERS = {
     toRows: (uid, arr) => arr.map((m) => ({ user_id: uid, role: m.role, content: m.content, at: m.at })),
     fromRows: (rows) => rows.map((r) => ({ role: r.role, content: r.content, at: r.at })),
     conflict: null,
+    orderBy: "at",
   },
   weekly_reviews: {
     table: "weekly_reviews",
@@ -133,7 +141,11 @@ export async function refresh(name) {
   const adapter = ADAPTERS[name];
   if (!adapter) throw new Error(`Unknown data file: ${name}`);
   const uid = await currentUserId();
-  const { data, error } = await supabase.from(adapter.table).select("*").eq("user_id", uid).order("created_at", { ascending: true });
+  const { data, error } = await supabase
+    .from(adapter.table)
+    .select("*")
+    .eq("user_id", uid)
+    .order(adapter.orderBy || "created_at", { ascending: true });
   if (error) throw error;
   const value = adapter.fromRows(data || []);
   setLocal(name, value);
