@@ -25,7 +25,10 @@ export async function sendMessage(system, messages, opts = {}) {
     messages,
   });
 
-  const TIMEOUT_MS = 90000;
+  // Large generations (e.g. the 8000-token weekly program) can legitimately take well over
+  // 90s non-streaming — scale the budget with the requested output size instead of aborting
+  // (and then retrying, doubling both the wait and the cost) a request that was still working.
+  const TIMEOUT_MS = Math.max(90000, (opts.maxTokens || 2048) * 20);
   let lastErr;
   for (let attempt = 0; attempt < 2; attempt++) {
     const controller = new AbortController();
