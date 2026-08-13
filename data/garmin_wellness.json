@@ -425,9 +425,9 @@
     "deep_sleep_seconds": null,
     "light_sleep_seconds": null,
     "rem_sleep_seconds": null,
-    "resting_hr": null,
+    "resting_hr": 55,
     "sleep_seconds": null,
-    "steps": null
+    "steps": 5437
   },
   {
     "awake_seconds": null,
@@ -467,37 +467,37 @@
     "rem_sleep_seconds": 6540,
     "resting_hr": 54,
     "sleep_seconds": 24780,
-    "steps": 3042
+    "steps": 8595
   },
   {
-    "awake_seconds": null,
+    "awake_seconds": 660,
     "date": "2026-08-05",
-    "deep_sleep_seconds": null,
-    "light_sleep_seconds": null,
-    "rem_sleep_seconds": null,
-    "resting_hr": null,
-    "sleep_seconds": null,
-    "steps": null
+    "deep_sleep_seconds": 6300,
+    "light_sleep_seconds": 13440,
+    "rem_sleep_seconds": 5580,
+    "resting_hr": 53,
+    "sleep_seconds": 25320,
+    "steps": 7073
   },
   {
-    "awake_seconds": null,
+    "awake_seconds": 60,
     "date": "2026-08-06",
-    "deep_sleep_seconds": null,
-    "light_sleep_seconds": null,
-    "rem_sleep_seconds": null,
-    "resting_hr": null,
-    "sleep_seconds": null,
-    "steps": null
+    "deep_sleep_seconds": 4500,
+    "light_sleep_seconds": 13320,
+    "rem_sleep_seconds": 6300,
+    "resting_hr": 51,
+    "sleep_seconds": 24120,
+    "steps": 9163
   },
   {
-    "awake_seconds": null,
+    "awake_seconds": 420,
     "date": "2026-08-07",
-    "deep_sleep_seconds": null,
-    "light_sleep_seconds": null,
-    "rem_sleep_seconds": null,
-    "resting_hr": null,
-    "sleep_seconds": null,
-    "steps": null
+    "deep_sleep_seconds": 8340,
+    "light_sleep_seconds": 15120,
+    "rem_sleep_seconds": 6660,
+    "resting_hr": 49,
+    "sleep_seconds": 30101,
+    "steps": 5763
   },
   {
     "awake_seconds": null,
@@ -505,29 +505,29 @@
     "deep_sleep_seconds": null,
     "light_sleep_seconds": null,
     "rem_sleep_seconds": null,
-    "resting_hr": null,
+    "resting_hr": 55,
     "sleep_seconds": null,
-    "steps": null
+    "steps": 1164
   },
   {
-    "awake_seconds": null,
+    "awake_seconds": 1320,
     "date": "2026-08-09",
-    "deep_sleep_seconds": null,
-    "light_sleep_seconds": null,
-    "rem_sleep_seconds": null,
+    "deep_sleep_seconds": 5220,
+    "light_sleep_seconds": 13500,
+    "rem_sleep_seconds": 7080,
     "resting_hr": null,
-    "sleep_seconds": null,
+    "sleep_seconds": 25800,
     "steps": null
   },
   {
-    "awake_seconds": null,
+    "awake_seconds": 1380,
     "date": "2026-08-10",
-    "deep_sleep_seconds": null,
-    "light_sleep_seconds": null,
-    "rem_sleep_seconds": null,
-    "resting_hr": null,
-    "sleep_seconds": null,
-    "steps": null
+    "deep_sleep_seconds": 4560,
+    "light_sleep_seconds": 13320,
+    "rem_sleep_seconds": 4860,
+    "resting_hr": 52,
+    "sleep_seconds": 22740,
+    "steps": 7123
   },
   {
     "awake_seconds": 0,

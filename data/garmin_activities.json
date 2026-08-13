@@ -96,5 +96,47 @@
     "name": "Philadelphia Running",
     "training_load": null,
     "type": "running"
+  },
+  {
+    "aerobic_effect": null,
+    "anaerobic_effect": null,
+    "avg_hr": 108.0,
+    "calories": 124.0,
+    "date": "2026-08-05",
+    "distance_meters": 1100.0,
+    "duration_seconds": 1812.9310302734375,
+    "id": 23956258826,
+    "max_hr": 150.0,
+    "name": "Pool Swim",
+    "training_load": null,
+    "type": "lap_swimming"
+  },
+  {
+    "aerobic_effect": null,
+    "anaerobic_effect": null,
+    "avg_hr": 108.0,
+    "calories": 339.0,
+    "date": "2026-08-07",
+    "distance_meters": 0.0,
+    "duration_seconds": 5425.583984375,
+    "id": 23956259208,
+    "max_hr": 155.0,
+    "name": "Strength",
+    "training_load": null,
+    "type": "strength_training"
+  },
+  {
+    "aerobic_effect": null,
+    "anaerobic_effect": null,
+    "avg_hr": 164.0,
+    "calories": 436.0,
+    "date": "2026-08-09",
+    "distance_meters": 0.0,
+    "duration_seconds": 2847.762939453125,
+    "id": 23956259499,
+    "max_hr": 191.0,
+    "name": "Cardio",
+    "training_load": null,
+    "type": "indoor_cardio"
   }
 ]
