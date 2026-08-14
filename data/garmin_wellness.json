@@ -557,7 +557,7 @@
     "rem_sleep_seconds": 6840,
     "resting_hr": 55,
     "sleep_seconds": 27000,
-    "steps": 10616
+    "steps": 11354
   },
   {
     "awake_seconds": null,
@@ -565,7 +565,7 @@
     "deep_sleep_seconds": null,
     "light_sleep_seconds": null,
     "rem_sleep_seconds": null,
-    "resting_hr": null,
+    "resting_hr": 56,
     "sleep_seconds": null,
     "steps": null
   }
