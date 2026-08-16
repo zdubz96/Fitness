@@ -138,5 +138,19 @@
     "name": "Cardio",
     "training_load": null,
     "type": "indoor_cardio"
+  },
+  {
+    "aerobic_effect": null,
+    "anaerobic_effect": null,
+    "avg_hr": 150.0,
+    "calories": 90.0,
+    "date": "2026-08-15",
+    "distance_meters": 1479.77001953125,
+    "duration_seconds": 606.3309936523438,
+    "id": 23992196302,
+    "max_hr": 169.0,
+    "name": "Bellevue Running",
+    "training_load": null,
+    "type": "running"
   }
 ]

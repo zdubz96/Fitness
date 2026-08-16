@@ -406,8 +406,18 @@
   },
   {
     "date": "2026-08-15",
+    "fitness_age": null,
     "hrv_avg_ms": 55,
     "hrv_status": "BALANCED",
+    "intensity_minutes_moderate": null,
+    "intensity_minutes_vigorous": null,
+    "vo2max_cycling": null,
+    "vo2max_running": 43.0
+  },
+  {
+    "date": "2026-08-16",
+    "hrv_avg_ms": null,
+    "hrv_status": null,
     "intensity_minutes_moderate": null,
     "intensity_minutes_vigorous": null
   }

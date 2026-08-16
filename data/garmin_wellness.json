@@ -577,6 +577,16 @@
     "rem_sleep_seconds": 6120,
     "resting_hr": 52,
     "sleep_seconds": 24600,
-    "steps": 3024
+    "steps": 6698
+  },
+  {
+    "awake_seconds": null,
+    "date": "2026-08-16",
+    "deep_sleep_seconds": null,
+    "light_sleep_seconds": null,
+    "rem_sleep_seconds": null,
+    "resting_hr": null,
+    "sleep_seconds": null,
+    "steps": null
   }
 ]
