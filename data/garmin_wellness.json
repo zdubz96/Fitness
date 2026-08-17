@@ -590,13 +590,13 @@
     "steps": 12199
   },
   {
-    "awake_seconds": null,
+    "awake_seconds": 480,
     "date": "2026-08-17",
-    "deep_sleep_seconds": null,
-    "light_sleep_seconds": null,
-    "rem_sleep_seconds": null,
-    "resting_hr": 56,
-    "sleep_seconds": null,
-    "steps": 22
+    "deep_sleep_seconds": 5820,
+    "light_sleep_seconds": 14880,
+    "rem_sleep_seconds": 5820,
+    "resting_hr": 50,
+    "sleep_seconds": 26520,
+    "steps": 56
   }
 ]

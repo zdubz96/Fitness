@@ -423,8 +423,8 @@
   },
   {
     "date": "2026-08-17",
-    "hrv_avg_ms": null,
-    "hrv_status": null,
+    "hrv_avg_ms": 57,
+    "hrv_status": "BALANCED",
     "intensity_minutes_moderate": null,
     "intensity_minutes_vigorous": null
   }
